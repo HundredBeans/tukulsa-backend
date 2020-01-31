@@ -11,13 +11,13 @@ import sys
 import tempfile
 from argparse import ArgumentParser
 # Dari line
-from ...line import callback
+import line
 
 bp_callback = Blueprint('callback', __name__)
 api = Api(bp_callback)
 
 class LineCallbackResource(Resource):
   def post(self):
-    callback()
+    line.callback()
 
 api.add_resource(LineCallbackResource, '/callback')

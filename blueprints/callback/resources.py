@@ -3,6 +3,39 @@ import json
 from flask import Blueprint
 from flask_restful import Api, Resource
 from blueprints import db, app
+import datetime
+import errno
+import json
+import os
+import sys
+import tempfile
+from argparse import ArgumentParser
+# Dari line
+from flask import Flask, request, abort, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from linebot import (
+    LineBotApi, WebhookHandler
+)
+from linebot.exceptions import (
+    LineBotApiError, InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+    SourceUser, SourceGroup, SourceRoom,
+    TemplateSendMessage, ConfirmTemplate, MessageAction,
+    ButtonsTemplate, ImageCarouselTemplate, ImageCarouselColumn, URIAction,
+    PostbackAction, DatetimePickerAction,
+    CameraAction, CameraRollAction, LocationAction,
+    CarouselTemplate, CarouselColumn, PostbackEvent,
+    StickerMessage, StickerSendMessage, LocationMessage, LocationSendMessage,
+    ImageMessage, VideoMessage, AudioMessage, FileMessage,
+    UnfollowEvent, FollowEvent, JoinEvent, LeaveEvent, BeaconEvent,
+    MemberJoinedEvent, MemberLeftEvent,
+    FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent,
+    TextComponent, SpacerComponent, IconComponent, ButtonComponent,
+    SeparatorComponent, QuickReply, QuickReplyButton,
+    ImageSendMessage)
 
 bp_callback = Blueprint('callback', __name__)
 api = Api(bp_callback)

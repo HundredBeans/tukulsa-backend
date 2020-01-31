@@ -94,6 +94,8 @@ def after_request(response):
 ### IMPORT BLUEPRINTS ###
 from blueprints.callback.resources import bp_callback
 app.register_blueprint(bp_callback, url_prefix='')
+from blueprints.users.resources import bp_users
+app.register_blueprint(bp_users, url_prefix='/users')
 
 
 db.create_all()

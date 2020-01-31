@@ -20,6 +20,7 @@ import json
 import os
 import sys
 import tempfile
+import requests
 from argparse import ArgumentParser
 
 from flask import Flask, request, abort, send_from_directory
@@ -101,8 +102,41 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     text = event.message.text
+    if text == 'post userid':
+        profile = line_bot_api.get_profile(event.source.user_id)
+        res = requests.post(
+            'https://tukulsa-new-test.herokuapp.com/users',
+            json= {
+                'line_id' : profile.display_name
+            }
+        )
 
-    if text == 'profile':
+        line_bot_api.reply_message(
+            event.reply_token, [
+                TextSendMessage(text='Request_status: ' +
+                                res.status_code),
+            ]
+        )
+    
+    elif text == 'get userid':
+        res = requests.get(
+            'https://tukulsa-new-test.herokuapp.com/users'
+        )
+
+        res_json = res.json()
+        
+        for result in res_json:
+            line_bot_api.reply_message(
+                event.reply_token, [
+                    TextSendMessage(text='Request_status: ' +
+                                    result.id),
+                    TextSendMessage(text='Request_status: ' +
+                                    result.lineID),
+                ]
+            )
+
+
+    elif text == 'profile':
         if isinstance(event.source, SourceUser):
             profile = line_bot_api.get_profile(event.source.user_id)
             line_bot_api.reply_message(

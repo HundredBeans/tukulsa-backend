@@ -110,11 +110,12 @@ def handle_text_message(event):
                 'line_id' : profile.display_name
             }
         )
+        print(res)
 
         line_bot_api.reply_message(
             event.reply_token, [
                 TextSendMessage(text='Request_status: ' +
-                                res.status_code),
+                                str(res.status_code))
             ]
         )
     
@@ -124,14 +125,14 @@ def handle_text_message(event):
         )
 
         res_json = res.json()
-        
+        print(res_json)
         for result in res_json:
             line_bot_api.reply_message(
                 event.reply_token, [
                     TextSendMessage(text='Request_status: ' +
-                                    result.id),
+                                    str(result.id)),
                     TextSendMessage(text='Request_status: ' +
-                                    result.lineID),
+                                    str(result.line_id))
                 ]
             )
 

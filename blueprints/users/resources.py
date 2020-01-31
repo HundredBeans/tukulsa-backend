@@ -13,7 +13,7 @@ class UsersRootResource(Resource):
 
   def post(self):
     parser = reqparse.RequestParser()
-    parser.add_argument('line_id', location='json', default=1)
+    parser.add_argument('line_id', location='json')
     args = parser.parse_args()
     
     new_user = Users(line_id= args['line_id'])

@@ -9,7 +9,7 @@ class Users(db.Model):
 
   response_fileds = {
     'id' : fields.Integer,
-    'lineID' : fields.String
+    'line_id' : fields.String
   }
 
   def __init__(self, line_id):

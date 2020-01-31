@@ -127,12 +127,13 @@ def handle_text_message(event):
         res_json = res.json()
         print(res_json)
         for result in res_json:
+            print(result)
             line_bot_api.reply_message(
                 event.reply_token, [
                     TextSendMessage(text='Request_status: ' +
-                                    str(result.id)),
+                                    str(result['id'])),
                     TextSendMessage(text='Request_status: ' +
-                                    str(result.line_id))
+                                    str(result['line_id']))
                 ]
             )
 

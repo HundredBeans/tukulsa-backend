@@ -28,10 +28,10 @@ rds_link = os.environ.get('RDS_LINK')
 try:
     env = os.environ.get('FLASK_ENV', 'development')
     if env == 'testing':
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{pass}@{link}:3306/tukulsaprojecttest'.format(
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaprojecttest'.format(
             rds_pass, rds_link)
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{pass}@{link}:3306/tukulsaproject'.format(
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaproject'.format(
             rds_pass, rds_link)
 except Exception as e:
     raise e

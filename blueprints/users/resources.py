@@ -1,26 +1,67 @@
 from flask import Blueprint
 from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users
+from ..transactions.models import *
 from blueprints import db
 
 bp_users = Blueprint('users', __name__)
 api = Api(bp_users)
 
-class UsersRootResource(Resource):
+# USER GET SELF TRANSACTION HISTORY
+class UserById(Resource):
   def get(self):
-    users = Users.query.all()
-    return marshal(users, Users.response_fileds), 200
+    pass
 
+# POST AND GET SELF INFO USER
+class UserProfile(Resource):
+  def get(self):
+    pass
+  
   def post(self):
-    parser = reqparse.RequestParser()
-    parser.add_argument('line_id', location='json')
-    args = parser.parse_args()
-    
-    new_user = Users(line_id= args['line_id'])
-    db.session.add(new_user)
-    db.session.commit()
+    pass
 
-    return marshal(new_user, Users.response_fileds), 200
+# USER TOP UP MOBILE BALANCE
+class UserTopUp(Resource):
+  def post(self):
+    pass
 
-api.add_resource(UsersRootResource, '')
+# USER GET PAYMENT AND TRANSACTION STATUS
+class UserStatus(Resource):
+  def get(self):
+    pass
+
+# USER GET DETAIL TRANSACTION USING TRANSACTION ID AS INPUT
+class UserTransactionDetail(Resource):
+  def get(self):
+    pass
+
+# USER GET INFO ABOUT LATEST TRANSACTION
+class UserNewestTransaction(Resource):
+  def get(self):
+    pass
+
+# USER FILTER TRANSACTIONLIST BY OPERATOR, PRICE, OR TIMESTAMP
+class UserFilterTransactions(Resource):
+  def get(self):
+    pass
+
+# USER GET ALL PRODUCT LIST
+class ProductForUser(Resource):
+  def get(self):
+    pass
+
+# USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
+class ProductFilter(Resource):
+  def get(self):
+    pass
+
+api.add_resource(UserById, '/<int:id>')
+api.add_resource(UserProfile, '/<int:id>/profile')
+api.add_resource(UserTopUp, '/<int:id>/buying')
+api.add_resource(UserStatus, '/<int:id>/status')
+api.add_resource(UserTransactionDetail, '/transactions/<int:id>/')
+api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')
+api.add_resource(UserFilterTransactions, '/transactions/filterby/')
+api.add_resource(ProductForUser, '/product/list')
+api.add_resource(ProductFilter, '/product/filterby/')
 

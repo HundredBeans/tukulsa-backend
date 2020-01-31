@@ -40,6 +40,8 @@ from linebot.models import (
 bp_callback = Blueprint('callback', __name__)
 api = Api(bp_callback)
 
+line_bot_api = LineBotApi(channel_access_token)
+handler = WebhookHandler(channel_secret)
 class LineCallbackResource(Resource):
   def post(self):
     # get X-Line-Signature header value

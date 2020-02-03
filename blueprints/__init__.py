@@ -96,6 +96,9 @@ from blueprints.users.resources import bp_users
 app.register_blueprint(bp_users, url_prefix='/users')
 from blueprints.admin.resources import bp_admin
 app.register_blueprint(bp_admin, url_prefix='/admin')
+from blueprints.midtrans.resources import bp_midtrans
+app.register_blueprint(bp_midtrans, url_prefix='/notification/handling')
+
 
 
 db.create_all()

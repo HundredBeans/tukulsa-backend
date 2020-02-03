@@ -1,0 +1,14 @@
+flask
+werkzeug>=0.15.4
+flask-jwt-extended
+flask-migrate
+flask-restful
+flask-script
+flask-sqlalchemy
+password_strength
+pymysql
+pytest
+pytest-cov
+requests
+requests_oauthlib
+flask-cors

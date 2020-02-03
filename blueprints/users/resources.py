@@ -117,7 +117,7 @@ class UserChat(Resource):
         if args['status_number']:
             chat_field.status_number = bool(args['status_number'] == 'True')
         if args['operator']:
-            chat_field.operator = bool(args['operator'] == 'True')
+            chat_field.operator = args['operator']
         db.session.commit()
 
         # log

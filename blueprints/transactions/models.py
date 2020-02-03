@@ -6,8 +6,30 @@ from datetime import datetime
 class Product(db.Model):
     __tablename__ = "product"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id_api = db.Column(db.Integer, nullable=False)
-    image_path = db.Column(db.String(1000), default=None)
+    operator = db.Column(db.String(15), nullable=False)
+    code = db.Column(db.String(255), nullable=False)
+    nominal = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    valid_to = db.Column(db.String(5), nullable=False)
+    image = db.Column(db.String(255), nullable=False)
+
+    response_fileds = {
+        'id': fields.Integer,
+        'operator': fields.String,
+        'code': fields.String,
+        'nominal': fields.String,
+        'price': fields.String,
+        'valid_to': fields.String,
+        'image': fields.String
+    }
+
+    def __init__(self, operator, code, nominal, price, valid_to, image):
+        self.operator = operator
+        self.code = code
+        self.nominal = nominal
+        self.price = price
+        self.valid_to = valid_to
+        self.image = image
 
 
 class Transactions(db.Model):
@@ -26,8 +48,10 @@ class Transactions(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     payment_status = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=False)
-    trx_product = db.relationship('Product', backref='transactions')
-    trx_timedetail = db.relationship('Timedetails', backref='transactions')
+    trx_product = db.relationship(
+        'Product', backref='transactions', cascade="delete")
+    trx_timedetail = db.relationship(
+        'Timedetails', backref='transactions', cascade="delete")
 
 
 class Timedetails(db.Model):

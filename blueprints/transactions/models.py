@@ -26,8 +26,8 @@ class Transactions(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     payment_status = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=False)
-    trx_product = db.relationship('product', backref='transactions')
-    trx_timedetail = db.relationship('timedetails', backref='transactions')
+    trx_product = db.relationship('Product', backref='transactions')
+    trx_timedetail = db.relationship('Timedetails', backref='transactions')
 
 
 class Timedetails(db.Model):

@@ -102,6 +102,7 @@ class UserChat(Resource):
         parser.add_argument('nominal', location='json')
         parser.add_argument('status_nominal', location='json')
         parser.add_argument('status_number', location='json')
+        parser.add_argument('operator', location='json')
         args = parser.parse_args()
 
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
@@ -115,6 +116,8 @@ class UserChat(Resource):
             chat_field.status_nominal = bool(args['status_nominal'] == 'True')
         if args['status_number']:
             chat_field.status_number = bool(args['status_number'] == 'True')
+        if args['operator']:
+            chat_field.operator = bool(args['operator'] == 'True')
         db.session.commit()
 
         # log

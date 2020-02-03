@@ -19,7 +19,7 @@ class Users(db.Model):
         'line_id': fields.String,
     }
 
-    def __init__(self, line_id, display_name, user_status):
+    def __init__(self, line_id, display_name):
         self.line_id = line_id
         self.display_name = display_name
 

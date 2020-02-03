@@ -18,7 +18,6 @@ class UserRootPath(Resource):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
         parser.add_argument('display_name', location='json', required=True)
-        parser.add_argument('user_status', location='json', required=True)
         args = parser.parse_args()
 
         # user by line_id
@@ -29,8 +28,7 @@ class UserRootPath(Resource):
         # create new user
         new_user = Users(
             line_id=args['line_id'],
-            display_name=args['display_name'],
-            user_status=args['user_status'],
+            display_name=args['display_name']
         )
         # chat_userid, phone_number, nominal
         db.session.add(new_user)

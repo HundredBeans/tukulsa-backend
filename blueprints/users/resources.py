@@ -102,6 +102,7 @@ class UserChat(Resource):
         parser.add_argument('nominal', location='json')
         parser.add_argument('status_nominal', location='json')
         parser.add_argument('status_number', location='json')
+        parser.add_argument('operator', location='json')
         args = parser.parse_args()
 
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
@@ -115,6 +116,8 @@ class UserChat(Resource):
             chat_field.status_nominal = bool(args['status_nominal'] == 'True')
         if args['status_number']:
             chat_field.status_number = bool(args['status_number'] == 'True')
+        if args['operator']:
+            chat_field.operator = bool(args['operator'] == 'True')
         db.session.commit()
 
         # log
@@ -172,13 +175,29 @@ class UserFilterTransactions(Resource):
 class ProductForUser(Resource):
     # USER GET ALL PRODUCT LIST
     def get(self):
-        pass
+        all_product = Product.query.all()
+        result = []
+        for each in all_product:
+            marshal_product = marshal(each, Product.response_fileds)
+            result.append(marshal_product)
+
+        return result, 200, {'Content-Type': 'application/json'}
 
 
 class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
-    def get(self):
-        pass
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('operator', location='json', required=True)
+        args = parser.parse_args()
+        selected_products = Product.query.filter(
+            Product.operator.contains(args['operator'])).all()
+        result = []
+        for product in selected_products:
+            marshal_product = marshal(product, Product.response_fileds)
+            result.append(marshal_product)
+        print(result)
+        return result, 200, {'Content-Type': 'application/json'}
 
 
 class GenerateProductList(Resource):
@@ -192,23 +211,12 @@ class GenerateProductList(Resource):
         'smart': 'https://developer.mobilepulsa.net/assets/images/products/smartfren.png'
     }
 
-    # {
-    #     "pulsa_code": "hindosat60000",
-    #     "pulsa_op": "Indosat",
-    #     "pulsa_nominal": "60000",
-    #     "pulsa_price": 58800,
-    #     "pulsa_type": "pulsa",
-    #     "masaaktif": "0",
-    #     "status": "active"
-    # },
-    # filter masaaktif > 0
-    # status aktif
-    # try except filter pulsa aja
     def get(self):
         for index, key in enumerate(self.image_path):
-          # get product by operator result in list
+            # get product by operator result in list
             result_product = get_operator('{}'.format(key))['data']
             for each in result_product:
+                # condition for add product to product list databsae
                 cond_1 = bool(int(each['masaaktif']) > 0)
                 cond_2 = bool(each['status'] == "active")
                 if cond_1 and cond_2:
@@ -230,11 +238,11 @@ api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
 api.add_resource(UserTopUp, '/<int:id>/buying')
 api.add_resource(UserStatus, '/<int:id>/status')
-api.add_resource(UserTransactionDetail, '/transactions/<int:id>/')
+api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
 api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')
-api.add_resource(UserFilterTransactions, '/transactions/filterby/')
+api.add_resource(UserFilterTransactions, '/transactions/filterby')
 api.add_resource(ProductForUser, '/product/list')
-api.add_resource(ProductFilter, '/product/filterby/')
+api.add_resource(ProductFilter, '/product/filterby')
 api.add_resource(UserRootPath, '')
 api.add_resource(UserChat, '/chat')
 api.add_resource(GenerateProductList, '/product/generate')

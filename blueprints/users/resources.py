@@ -224,7 +224,7 @@ class UserFilterTransactions(Resource):
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
             "desc", "asc"), default="desc")
         parser.add_argument("order_by", location="json", help="invalid order-by value",
-                            choices=("created_at"), default="code")
+                            choices=("created_at, id"), default="created_at")
         args = parser.parse_args()
 
         # qry = Transactions.query.filter_by(
@@ -239,25 +239,23 @@ class UserFilterTransactions(Resource):
                     desc(Transactions.id))
             else:
                 qry = qry.order_by(Transactions.id)
-        elif args["order_by"] == "code":
+        elif args["order_by"] == "created_at":
             if args["sort"] == "desc":
                 qry = qry.order_by(
-                    desc(Transactions.code))
+                    desc(Transactions.created_at))
             else:
-                qry = qry.order_by(Transactions.code)
-        elif args["order_by"] == "price":
-            if args["sort"] == "desc":
-                qry = qry.order_by(
-                    desc(Transactions.price))
-            else:
-                qry = qry.order_by(Transactions.price)
+                qry = qry.order_by(Transactions.created_at)
 
           # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])
         qry = qry.limit(int(args['limit'])).offset(offset)
 
-        selected_products = qry.all()
-        print(selected_products)
+        all_trx = qry.all()
+        result = []
+        for trx in all_trx:
+            marshal_trx = marshal(trx, Transactions.response_fields)
+            result.append(marshal_trx)
+        return result, 200
 
 
 class ProductForUser(Resource):

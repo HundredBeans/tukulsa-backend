@@ -33,17 +33,19 @@ class MidtransCallback(Resource):
         )
 
         mock_notification = {
-            'currency': 'IDR',
-            'fraud_status': 'accept',
-            'gross_amount': '24145.00',
-            'order_id': 'test-transaction-321',
-            'payment_type': 'bank_transfer',
-            'status_code': '201',
-            'status_message': 'Success, Bank Transfer transaction is created',
-            'transaction_id': '6ee793df-9b1d-4343-8eda-cc9663b4222f',
-            'transaction_status': 'pending',
-            'transaction_time': '2018-10-24 15:34:33',
-            'va_numbers': [{'bank': 'bca', 'va_number': '490526303019299'}]
+            "transaction_time": "2020-02-04 22:03:44",
+            "gross_amount": "10950.00",
+            "currency": "IDR",
+            "order_id": "TUKULSA-TUKULSAORDER2-17",
+            "payment_type": "gopay",
+            "signature_key": "8f83c0dce379431bfdda36f038f5c39383e74ae948207c55b9a29c4ea4e41d74bc393a6628f89d5d4530c5798378625d9850cf6f5ce16107686793eded349c84",
+            "status_code": "200",
+            "transaction_id": "9bd2c6e3-f1de-4980-b1b5-8ccf9eae2b61",
+            "transaction_status": "settlement",
+            "fraud_status": "accept",
+            "settlement_time": "2020-02-04 22:03:46",
+            "status_message": "Success, transaction is found",
+            "merchant_id": "G018994973"
         }
         # handle notification JSON sent by Midtrans, it auto verify it by doing get status
         # parameter can be Dictionary or String of JSON

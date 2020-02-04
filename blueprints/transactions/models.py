@@ -49,35 +49,35 @@ class Transactions(db.Model):
     payment_status = db.Column(db.Boolean, default=False)
     order_status = db.Column(db.Boolean, default=False)
     trx_users = db.relationship(
-        'Users', backref='transactions', cascade="delete")
+        'Users', backref='transactions', cascade="all", lazy="joined")
     trx_product = db.relationship(
-        'Product', backref='transactions', cascade="delete")
+        'Product', backref='transactions', cascade="all", lazy="joined")
     trx_timedetail = db.relationship(
-        'Timedetails', backref='transactions', cascade="delete")
-    
+        'Timedetails', backref='transactions', cascade="all", lazy="joined")
+
     response_fields = {
-      "id" : fields.Integer,
-      "phone_number": fields.String,
-      "order_id": fields.String,
-      "product_id": fields.String,
-      "operator": fields.String,
-      "label": fields.String,
-      "nominal": fields.Integer,
-      "price": fields.Integer,
-      "created_at": fields.DateTime,
-      "payment_status": fields.Boolean,
-      "order_status": fields.Boolean
+        "id": fields.Integer,
+        "phone_number": fields.String,
+        "order_id": fields.String,
+        "product_id": fields.String,
+        "operator": fields.String,
+        "label": fields.String,
+        "nominal": fields.Integer,
+        "price": fields.Integer,
+        "created_at": fields.DateTime,
+        "payment_status": fields.Boolean,
+        "order_status": fields.Boolean
     }
 
     def __init__(self, user_id, phone_number, product_id, operator, label, nominal, price, created_at):
-      self.user_id = user_id
-      self.phone_number = phone_number
-      self.product_id = product_id
-      self.operator = operator
-      self.label = label
-      self.nominal = nominal
-      self.price = price
-      self.created_at = created_at
+        self.user_id = user_id
+        self.phone_number = phone_number
+        self.product_id = product_id
+        self.operator = operator
+        self.label = label
+        self.nominal = nominal
+        self.price = price
+        self.created_at = created_at
 
 
 class Timedetails(db.Model):

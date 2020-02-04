@@ -22,7 +22,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 jwt = JWTManager(app)
 
-### SQL ALCHEMY CONFIG AWS ###
+## SQL ALCHEMY CONFIG AWS ###
 rds_pass = os.environ.get('RDS_PASS')
 rds_link = os.environ.get('RDS_LINK')
 try:
@@ -43,7 +43,7 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
-### SQL ALCHEMY CONFIG LOCAL ###
+# ## SQL ALCHEMY CONFIG LOCAL ###
 # mysql_pass = os.environ.get('MYSQL_PASS', '')
 # # mysql_pass = ''
 # try:

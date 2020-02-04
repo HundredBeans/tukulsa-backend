@@ -6,6 +6,7 @@ from .models import Users, Chat
 from ..transactions.models import *
 from blueprints import db, app
 from mobilepulsa import get_operator, buying_pulsa
+from sqlalchemy import desc
 
 bp_users = Blueprint('users', __name__)
 api = Api(bp_users)
@@ -209,10 +210,29 @@ class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
     def post(self):
         parser = parser = reqparse.RequestParser()
+        parser.add_argument('page', location='args', default = 1)
+        parser.add_argument('limit', location='args', default = 10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc","asc"), default="a  sc")
         parser.add_argument('operator', location='json', required=True)
+        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id", "price"), default="price")
         args = parser.parse_args()
-        selected_products = Product.query.filter(
-            Product.operator.contains(args['operator'])).all()
+        qry = Product.query.filter(
+            Product.operator.contains(args['operator']))
+
+        # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
+            else: qry = qry.order_by(Product.id)
+        elif args["order_by"] == "price":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
+            else: qry = qry.order_by(Product.price)
+
+        # pagination
+        offset = (int(args["page"]) - 1)*int(args["limit"])
+        qry = qry.limit(int(args['limit'])).offset(offset)
+        
+        selected_products = qry.all()
+        # print(selected_products)
         result = []
         for product in selected_products:
             marshal_product = marshal(product, Product.response_fileds)

@@ -35,8 +35,8 @@ class Product(db.Model):
 class Transactions(db.Model):
     __tablename__ = "transactions"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.Integer, db.ForeignKey(
-        'product.id'), nullable=False)
+    product_code = db.Column(db.Integer, db.ForeignKey(
+        'product.code'), nullable=False)
     trx_id_api = db.Column(db.Integer, nullable=False, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id', ondelete='CASCADE'), nullable=False)

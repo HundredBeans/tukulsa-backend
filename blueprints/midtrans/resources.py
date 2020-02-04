@@ -76,7 +76,7 @@ class MidtransCallback(Resource):
             print('masuk pending')
             # set transaction status on your databaase to 'pending' / waiting payment
             # None
-        return 200
+        return 200, {'Content-Type': 'application/json'}
 
 
 api.add_resource(MidtransCallback, '')

@@ -220,32 +220,39 @@ class UserFilterTransactions(Resource):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
         parser.add_argument('page', location='args', default=1)
-        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument('limit', location='args', default=20)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
-            "desc", "asc"), default="asc")
+            "desc", "asc"), default="desc")
         parser.add_argument("order_by", location="json", help="invalid order-by value",
-                            choices=("id", "code", "price"), default="code")
+                            choices=("created_at"), default="code")
         args = parser.parse_args()
 
-        qry = Transactions.query.first()
-        print(qry)
-        #         # sort and order
-        # if args["order_by"] == "id":
-        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
-        #     else: qry = qry.order_by(Product.id)
-        # elif args["order_by"] == "code":
-        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
-        #     else: qry = qry.order_by(Product.code)
-        # elif args["order_by"] == "price":
-        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
-        #     else: qry = qry.order_by(Product.price)
+        # qry = Transactions.query.filter_by(
+        #     Transactions.trx_users.line_id.contains(args['line_id'])).all()
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+        qry = Transactions.query.filter_by(user_id=selected_user.id)
+        # print(qry)
+        # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc": qry = qry.order_by(
+                desc(Transactions.id))
+            else: qry = qry.order_by(Transactions.id)
+        elif args["order_by"] == "code":
+            if args["sort"] == "desc": qry = qry.order_by(
+                desc(Transactions.code))
+            else: qry = qry.order_by(Transactions.code)
+        elif args["order_by"] == "price":
+            if args["sort"] == "desc": qry = qry.order_by(
+                desc(Transactions.price))
+            else: qry = qry.order_by(Transactions.price)
 
-        #   # pagination
-        #   offset = (int(args["page"]) - 1)*int(args["limit"])
-        #   qry = qry.limit(int(args['limit'])).offset(offset)
+          # pagination
+          offset = (int(args["page"]) - 1)*int(args["limit"])
+          qry = qry.limit(int(args['limit'])).offset(offset)
 
-        #   selected_products = qry.all()
-        #   )
+          selected_products = qry.all()
+          )
+          print(selected_products)
 
 
 class ProductForUser(Resource):

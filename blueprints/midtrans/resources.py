@@ -25,9 +25,8 @@ class MidtransCallback(Resource):
         return 200
 
     def post(self):
-        import midtransclient
         # initialize api client object
-        api_client = midtransclient.CoreApi(
+        api_client = midtransclient.Snap(
             is_production=False,
             server_key=username,
             client_key=client_key
@@ -77,6 +76,7 @@ class MidtransCallback(Resource):
             print('masuk pending')
             # set transaction status on your databaase to 'pending' / waiting payment
             # None
+        return 200
 
 
 api.add_resource(MidtransCallback, '')

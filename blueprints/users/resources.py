@@ -227,8 +227,8 @@ class UserFilterTransactions(Resource):
                             choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
 
-        # qry = Transactions.query.filter(
-        #       Transactions.trx_users.contains(args['line_id']))
+        qry = Transactions.query.filter(
+            Transactions.trx_users.contains(args['line_id']))
 
         #         # sort and order
         # if args["order_by"] == "id":

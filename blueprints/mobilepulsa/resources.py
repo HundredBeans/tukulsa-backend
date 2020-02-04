@@ -49,7 +49,6 @@ class BuyPulsa(Resource):
         # parser=reqparse.RequestParser()
         # parser.add_argument('id', location="json")
         # parser.add_argument('phoneNum', location="json")
-        # parser.add_argument('pulsa_code', location="json")
         # args=parser.parse_args()
 
         

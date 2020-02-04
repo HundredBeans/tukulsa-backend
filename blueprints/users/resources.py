@@ -163,14 +163,14 @@ class UserTopUp(Resource):
         # new transaction
         new_transaction = Transactions(
             user_id=selected_user.id,
-          phone_number=args['phone_number'],
-          product_id=selected_product.id,
-          operator=selected_product.operator,
-          label='{} {}'.format(selected_product.operator,
-                               selected_product.nominal),
-          nominal=selected_product.nominal,
-          price=selected_product.price,
-          created_at=datetime.now()
+            phone_number=args['phone_number'],
+            product_id=selected_product.id,
+            operator=selected_product.operator,
+            label='{} {}'.format(selected_product.operator,
+                                 selected_product.nominal),
+            nominal=selected_product.nominal,
+            price=selected_product.price,
+            created_at=datetime.now()
         )
         db.session.add(new_transaction)
         db.session.commit()
@@ -184,10 +184,10 @@ class UserTopUp(Resource):
 
         link_payment = midtrans_payment(
             order_id=new_transaction.order_id,
-          label=new_transaction.label,
-          phone_number=new_transaction.phone_number,
-          display_name=selected_user.display_name,
-          price=new_transaction.price
+            label=new_transaction.label,
+            phone_number=new_transaction.phone_number,
+            display_name=selected_user.display_name,
+            price=new_transaction.price
         )
 
         marshal_trx['link_payment'] = link_payment
@@ -223,30 +223,30 @@ class UserFilterTransactions(Resource):
         parser.add_argument('limit', location='args', default=10)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
             "desc", "asc"), default="asc")
-        parser.add_argument('operator', location='json', required=True)
         parser.add_argument("order_by", location="json", help="invalid order-by value",
                             choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
 
-          qry = Product.query.filter(
-              Product.operator.contains(args['operator']))
+        # qry = Transactions.query.filter(
+        #       Transactions.trx_users.contains(args['line_id']))
 
-                # sort and order
-        if args["order_by"] == "id":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
-            else: qry = qry.order_by(Product.id)
-        elif args["order_by"] == "code":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
-            else: qry = qry.order_by(Product.code)
-        elif args["order_by"] == "price":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
-            else: qry = qry.order_by(Product.price)
+        #         # sort and order
+        # if args["order_by"] == "id":
+        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
+        #     else: qry = qry.order_by(Product.id)
+        # elif args["order_by"] == "code":
+        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
+        #     else: qry = qry.order_by(Product.code)
+        # elif args["order_by"] == "price":
+        #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
+        #     else: qry = qry.order_by(Product.price)
 
-          # pagination
-          offset = (int(args["page"]) - 1)*int(args["limit"])
-          qry = qry.limit(int(args['limit'])).offset(offset)
+        #   # pagination
+        #   offset = (int(args["page"]) - 1)*int(args["limit"])
+        #   qry = qry.limit(int(args['limit'])).offset(offset)
 
-          selected_products = qry.all()
+        #   selected_products = qry.all()
+        #   )
 
 
 class ProductForUser(Resource):
@@ -265,11 +265,13 @@ class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
     def post(self):
         parser = parser = reqparse.RequestParser()
-        parser.add_argument('page', location='args', default= 1)
-        parser.add_argument('limit', location='args', default= 10)
-        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
+        parser.add_argument('page', location='args', default=1)
+        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=(
+            "desc", "asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
-        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id", "code", "price"), default="code")
+        parser.add_argument("order_by", location="json", help="invalid order-by value",
+                            choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
         qry = Product.query.filter(
             Product.operator.contains(args['operator']))
@@ -278,15 +280,18 @@ class ProductFilter(Resource):
         if args["order_by"] == "id":
             if args["sort"] == "desc":
                 qry = qry.order_by(desc(Product.id))
-            else: qry = qry.order_by(Product.id)
+            else:
+                qry = qry.order_by(Product.id)
         elif args["order_by"] == "code":
             if args["sort"] == "desc":
                 qry = qry.order_by(desc(Product.code))
-            else: qry = qry.order_by(Product.code)
+            else:
+                qry = qry.order_by(Product.code)
         elif args["order_by"] == "price":
             if args["sort"] == "desc":
                 qry = qry.order_by(desc(Product.price))
-            else: qry = qry.order_by(Product.price)
+            else:
+                qry = qry.order_by(Product.price)
 
         # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])

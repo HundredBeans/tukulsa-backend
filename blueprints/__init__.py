@@ -22,33 +22,33 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 jwt = JWTManager(app)
 
-# ### SQL ALCHEMY CONFIG AWS ###
-# rds_pass = os.environ.get('RDS_PASS')
-# rds_link = os.environ.get('RDS_LINK')
-# try:
-#     env = os.environ.get('FLASK_ENV', 'development')
-#     if env == 'testing':
-#         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaprojecttest'.format(
-#             rds_pass, rds_link)
-#     else:
-#         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaproject'.format(
-#             rds_pass, rds_link)
-# except Exception as e:
-#     raise e
-
-
-## SQL ALCHEMY CONFIG LOCAL ###
-mysql_pass = os.environ.get('MYSQL_PASS', '')
+### SQL ALCHEMY CONFIG AWS ###
+rds_pass = os.environ.get('RDS_PASS')
+rds_link = os.environ.get('RDS_LINK')
 try:
     env = os.environ.get('FLASK_ENV', 'development')
     if env == 'testing':
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@localhost:3306/tukulsaprojecttest'.format(
-            mysql_pass)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaprojecttest'.format(
+            rds_pass, rds_link)
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@localhost:3306/tukulsaproject'.format(
-            mysql_pass)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@{}:3306/tukulsaproject'.format(
+            rds_pass, rds_link)
 except Exception as e:
     raise e
+
+
+# ## SQL ALCHEMY CONFIG LOCAL ###
+# mysql_pass = os.environ.get('MYSQL_PASS', '')
+# try:
+#     env = os.environ.get('FLASK_ENV', 'development')
+#     if env == 'testing':
+#         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@localhost:3306/tukulsaprojecttest'.format(
+#             mysql_pass)
+#     else:
+#         app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@localhost:3306/tukulsaproject'.format(
+#             mysql_pass)
+# except Exception as e:
+#     raise e
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

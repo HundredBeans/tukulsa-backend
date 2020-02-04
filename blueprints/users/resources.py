@@ -234,25 +234,30 @@ class UserFilterTransactions(Resource):
         # print(qry)
         # sort and order
         if args["order_by"] == "id":
-            if args["sort"] == "desc": qry = qry.order_by(
-                desc(Transactions.id))
-            else: qry = qry.order_by(Transactions.id)
+            if args["sort"] == "desc":
+                qry = qry.order_by(
+                    desc(Transactions.id))
+            else:
+                qry = qry.order_by(Transactions.id)
         elif args["order_by"] == "code":
-            if args["sort"] == "desc": qry = qry.order_by(
-                desc(Transactions.code))
-            else: qry = qry.order_by(Transactions.code)
+            if args["sort"] == "desc":
+                qry = qry.order_by(
+                    desc(Transactions.code))
+            else:
+                qry = qry.order_by(Transactions.code)
         elif args["order_by"] == "price":
-            if args["sort"] == "desc": qry = qry.order_by(
-                desc(Transactions.price))
-            else: qry = qry.order_by(Transactions.price)
+            if args["sort"] == "desc":
+                qry = qry.order_by(
+                    desc(Transactions.price))
+            else:
+                qry = qry.order_by(Transactions.price)
 
           # pagination
-          offset = (int(args["page"]) - 1)*int(args["limit"])
-          qry = qry.limit(int(args['limit'])).offset(offset)
+        offset = (int(args["page"]) - 1)*int(args["limit"])
+        qry = qry.limit(int(args['limit'])).offset(offset)
 
-          selected_products = qry.all()
-          )
-          print(selected_products)
+        selected_products = qry.all()
+        print(selected_products)
 
 
 class ProductForUser(Resource):

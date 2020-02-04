@@ -5,7 +5,7 @@ from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users, Chat
 from ..transactions.models import *
 from blueprints import db, app
-from mobilepulsa import get_operator
+from mobilepulsa import get_operator, buying_pulsa
 
 bp_users = Blueprint('users', __name__)
 api = Api(bp_users)
@@ -144,8 +144,27 @@ class UserProfile(Resource):
 
 class UserTopUp(Resource):
     # USER TOP UP MOBILE BALANCE
+    #     {
+    #     "data": {
+    #         "ref_id": "order003",
+    #         "status": 0,
+    #         "code": "hindosat5000",
+    #         "hp": "08111111",
+    #         "price": 5990,
+    #         "message": "PROCESS",
+    #         "balance": 9963020,
+    #         "tr_id": 23046,
+    #         "rc": "39"
+    #     }
+    # }
+    # buying_pulsa("order003","085659229599","hindosat5000" )
     def post(self):
-        pass
+        result = buying_pulsa()
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('product_code', location='json', required=True)
+        parser.add_argument('order_id', location='json', required=True)
+        args = parser.parse_args()
 
 
 class UserStatus(Resource):
@@ -236,7 +255,7 @@ class GenerateProductList(Resource):
 
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
-api.add_resource(UserTopUp, '/<int:id>/buying')
+api.add_resource(UserTopUp, '/transaction')
 api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
 api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')

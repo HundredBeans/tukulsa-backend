@@ -216,7 +216,7 @@ class UserNewestTransaction(Resource):
 
 class UserFilterTransactions(Resource):
     # USER FILTER TRANSACTIONLIST BY OPERATOR, PRICE, OR TIMESTAMP
-    def get(self):
+    def post(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
         parser.add_argument('page', location='args', default=1)
@@ -227,9 +227,8 @@ class UserFilterTransactions(Resource):
                             choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
 
-        qry = Transactions.query.filter(
-            Transactions.trx_users.contains(args['line_id']))
-
+        qry = Transactions.query.first()
+        print(qry)
         #         # sort and order
         # if args["order_by"] == "id":
         #     if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))

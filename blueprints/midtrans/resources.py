@@ -26,7 +26,7 @@ class MidtransCallback(Resource):
 
     def post(self):
         # initialize api client object
-        api_client = midtransclient.Snap(
+        api_client = midtransclient.CoreApi(
             is_production=False,
             server_key=username,
             client_key=client_key

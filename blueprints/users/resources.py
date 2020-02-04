@@ -6,7 +6,9 @@ from .models import Users, Chat
 from ..transactions.models import *
 from blueprints import db, app
 from mobilepulsa import get_operator, buying_pulsa
+from midtrans import midtrans_payment
 from sqlalchemy import desc
+from datetime import datetime
 
 
 bp_users = Blueprint('users', __name__)
@@ -145,30 +147,50 @@ class UserProfile(Resource):
 
 
 class UserTopUp(Resource):
-    # USER TOP UP MOBILE BALANCE
-    #     {
-    #     "data": {
-    #         "ref_id": "order003",
-    #         "status": 0,
-    #         "code": "hindosat5000",
-    #         "hp": "08111111",
-    #         "price": 5990,
-    #         "message": "PROCESS",
-    #         "balance": 9963020,
-    #         "tr_id": 23046,
-    #         "rc": "39"
-    #     }
-    # }
-    # buying_pulsa("order003","085659229599","hindosat5000" )
-    # INPUT user id, product code, phone numer 
-    # field require order id, phone number. product code,  
+    # USER GET PAYMENT URL
     def post(self):
-        result = buying_pulsa()
         parser = parser = reqparse.RequestParser()
-        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('line_id', location='json', required=True)
         parser.add_argument('product_code', location='json', required=True)
-        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('phone_number', location='json', required=True)
         args = parser.parse_args()
+        # butuh selected user
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+        # butuh selected product
+        selected_product = Product.query.filter_by(code=args['product_code']).first()
+
+        # # new transaction
+        new_transaction = Transactions(
+          user_id=selected_user.id,
+          phone_number= args['phone_number'],
+          product_id=selected_product.id,
+          operator=selected_product.operator,
+          label= '{} {}'.format(selected_product.operator, selected_product.nominal),
+          nominal = selected_product.nominal,
+          price = selected_product.price,
+          created_at=datetime.now()
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+
+        # production = delete --TEST--
+        new_transaction.order_id = 'TUKULSAORDER2-{}'.format(str(new_transaction.id))
+        db.session.commit()
+        
+        marshal_trx = marshal(new_transaction, Transactions.response_fields)
+        
+        link_payment = midtrans_payment(
+          order_id=new_transaction.order_id,
+          label=new_transaction.label,
+          phone_number=new_transaction.phone_number,
+          display_name=selected_user.display_name,
+          price=new_transaction.price
+        )
+
+        marshal_trx['link_payment'] = link_payment
+
+        # print(marshal_trx)
+        return marshal_trx, 200, {'Content-Type': 'application/json'}
 
 
 class UserStatus(Resource):
@@ -213,9 +235,9 @@ class ProductFilter(Resource):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('page', location='args', default = 1)
         parser.add_argument('limit', location='args', default = 10)
-        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc","asc"), default="a  sc")
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc","asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
-        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id", "price"), default="price")
+        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id","code", "price"), default="code")
         args = parser.parse_args()
         qry = Product.query.filter(
             Product.operator.contains(args['operator']))
@@ -224,6 +246,9 @@ class ProductFilter(Resource):
         if args["order_by"] == "id":
             if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
             else: qry = qry.order_by(Product.id)
+        elif args["order_by"] == "code":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
+            else: qry = qry.order_by(Product.code)
         elif args["order_by"] == "price":
             if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
             else: qry = qry.order_by(Product.price)

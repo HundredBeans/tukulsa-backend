@@ -7,7 +7,7 @@ class Product(db.Model):
     __tablename__ = "product"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     operator = db.Column(db.String(15), nullable=False)
-    code = db.Column(db.String(255), nullable=False)
+    code = db.Column(db.String(255), unique=True, nullable=False)
     nominal = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Integer, nullable=False)
     valid_to = db.Column(db.String(5), nullable=False)
@@ -35,23 +35,49 @@ class Product(db.Model):
 class Transactions(db.Model):
     __tablename__ = "transactions"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_code = db.Column(db.Integer, db.ForeignKey(
-        'product.code'), nullable=False)
-    trx_id_api = db.Column(db.Integer, nullable=False, default=0)
+    product_id = db.Column(db.Integer, db.ForeignKey(
+        'product.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(
-        'users.id', ondelete='CASCADE'), nullable=False)
-    provider = db.Column(db.String(10), nullable=False, default=None)
-    phone_number = db.Column(db.String(13), nullable=False)
+        'users.id'), nullable=False)
+    phone_number = db.Column(db.String(15), nullable=False)
+    order_id = db.Column(db.String(255), default=None)
+    operator = db.Column(db.String(15), nullable=False, default=None)
     label = db.Column(db.String(255), nullable=False, default=None)
     nominal = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
     payment_status = db.Column(db.Boolean, default=False)
-    status = db.Column(db.Boolean, default=False)
+    order_status = db.Column(db.Boolean, default=False)
+    trx_users = db.relationship(
+        'Users', backref='transactions', cascade="delete")
     trx_product = db.relationship(
         'Product', backref='transactions', cascade="delete")
     trx_timedetail = db.relationship(
         'Timedetails', backref='transactions', cascade="delete")
+    
+    response_fields = {
+      "id" : fields.Integer,
+      "phone_number": fields.String,
+      "order_id": fields.String,
+      "product_id": fields.String,
+      "operator": fields.String,
+      "label": fields.String,
+      "nominal": fields.Integer,
+      "price": fields.Integer,
+      "created_at": fields.DateTime,
+      "payment_status": fields.Boolean,
+      "order_status": fields.Boolean
+    }
+
+    def __init__(self, user_id, phone_number, product_id, operator, label, nominal, price, created_at):
+      self.user_id = user_id
+      self.phone_number = phone_number
+      self.product_id = product_id
+      self.operator = operator
+      self.label = label
+      self.nominal = nominal
+      self.price = price
+      self.created_at = created_at
 
 
 class Timedetails(db.Model):

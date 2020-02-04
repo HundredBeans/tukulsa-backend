@@ -24,9 +24,7 @@ class MidtransCallback(Resource):
     
 
     def post(self):
-
-        data=midtrans_payment("100", "indosat25000", "085659229599", "woka", 26000)
-        return {"payment":data},200
+        return 200
 
 
 api.add_resource(MidtransCallback, '')

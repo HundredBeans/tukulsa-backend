@@ -157,30 +157,33 @@ class UserTopUp(Resource):
         # butuh selected user
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
         # butuh selected product
-        selected_product = Product.query.filter_by(code=args['product_code']).first()
-
-        # # new transaction
+        selected_product = Product.query.filter_by(
+            code=args['product_code']).first()
+        print(selected_product.id)
+        # new transaction
         new_transaction = Transactions(
-          user_id=selected_user.id,
-          phone_number= args['phone_number'],
+            user_id=selected_user.id,
+          phone_number=args['phone_number'],
           product_id=selected_product.id,
           operator=selected_product.operator,
-          label= '{} {}'.format(selected_product.operator, selected_product.nominal),
-          nominal = selected_product.nominal,
-          price = selected_product.price,
+          label='{} {}'.format(selected_product.operator,
+                               selected_product.nominal),
+          nominal=selected_product.nominal,
+          price=selected_product.price,
           created_at=datetime.now()
         )
         db.session.add(new_transaction)
         db.session.commit()
 
         # production = delete --TEST--
-        new_transaction.order_id = 'TUKULSAORDER2-{}'.format(str(new_transaction.id))
+        new_transaction.order_id = 'TUKULSAORDER2-{}'.format(
+            str(new_transaction.id))
         db.session.commit()
-        
+
         marshal_trx = marshal(new_transaction, Transactions.response_fields)
-        
+
         link_payment = midtrans_payment(
-          order_id=new_transaction.order_id,
+            order_id=new_transaction.order_id,
           label=new_transaction.label,
           phone_number=new_transaction.phone_number,
           display_name=selected_user.display_name,
@@ -201,7 +204,7 @@ class UserStatus(Resource):
 
 class UserTransactionDetail(Resource):
     # USER GET DETAIL TRANSACTION USING TRANSACTION ID AS INPUT
-    def get(self):
+    def post(self):
         pass
 
 
@@ -214,7 +217,36 @@ class UserNewestTransaction(Resource):
 class UserFilterTransactions(Resource):
     # USER FILTER TRANSACTIONLIST BY OPERATOR, PRICE, OR TIMESTAMP
     def get(self):
-        pass
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('page', location='args', default=1)
+        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=(
+            "desc", "asc"), default="asc")
+        parser.add_argument('operator', location='json', required=True)
+        parser.add_argument("order_by", location="json", help="invalid order-by value",
+                            choices=("id", "code", "price"), default="code")
+        args = parser.parse_args()
+
+          qry = Product.query.filter(
+              Product.operator.contains(args['operator']))
+
+                # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
+            else: qry = qry.order_by(Product.id)
+        elif args["order_by"] == "code":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
+            else: qry = qry.order_by(Product.code)
+        elif args["order_by"] == "price":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
+            else: qry = qry.order_by(Product.price)
+
+          # pagination
+          offset = (int(args["page"]) - 1)*int(args["limit"])
+          qry = qry.limit(int(args['limit'])).offset(offset)
+
+          selected_products = qry.all()
 
 
 class ProductForUser(Resource):
@@ -233,30 +265,33 @@ class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
     def post(self):
         parser = parser = reqparse.RequestParser()
-        parser.add_argument('page', location='args', default = 1)
-        parser.add_argument('limit', location='args', default = 10)
-        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc","asc"), default="asc")
+        parser.add_argument('page', location='args', default= 1)
+        parser.add_argument('limit', location='args', default= 10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
-        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id","code", "price"), default="code")
+        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
         qry = Product.query.filter(
             Product.operator.contains(args['operator']))
 
         # sort and order
         if args["order_by"] == "id":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.id))
             else: qry = qry.order_by(Product.id)
         elif args["order_by"] == "code":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.code))
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.code))
             else: qry = qry.order_by(Product.code)
         elif args["order_by"] == "price":
-            if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.price))
             else: qry = qry.order_by(Product.price)
 
         # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])
         qry = qry.limit(int(args['limit'])).offset(offset)
-        
+
         selected_products = qry.all()
         # print(selected_products)
         result = []

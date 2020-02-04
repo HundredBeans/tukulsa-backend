@@ -7,7 +7,7 @@ from ..transactions.models import *
 from blueprints import db, app
 from mobilepulsa import get_operator, buying_pulsa
 from midtrans import midtrans_payment
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 from datetime import datetime
 
 
@@ -210,8 +210,19 @@ class UserTransactionDetail(Resource):
 
 class UserNewestTransaction(Resource):
     # USER GET INFO ABOUT LATEST TRANSACTION
-    def get(self):
-        pass
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        args = parser.parse_args()
+
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+
+        selected_trx = Transactions.query.filter_by(
+            user_id=selected_user.id).order_by(desc(Transactions.id)).first()
+
+        marshal_trx = marshal(selected_trx, Transactions.response_fields)
+
+        return marshal_trx, 200
 
 
 class UserFilterTransactions(Resource):
@@ -224,7 +235,7 @@ class UserFilterTransactions(Resource):
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
             "desc", "asc"), default="desc")
         parser.add_argument("order_by", location="json", help="invalid order-by value",
-                            choices=("created_at, id"), default="created_at")
+                            choices=("id"), default="id")
         args = parser.parse_args()
 
         # qry = Transactions.query.filter_by(
@@ -239,14 +250,8 @@ class UserFilterTransactions(Resource):
                     desc(Transactions.id))
             else:
                 qry = qry.order_by(Transactions.id)
-        elif args["order_by"] == "created_at":
-            if args["sort"] == "desc":
-                qry = qry.order_by(
-                    desc(Transactions.created_at))
-            else:
-                qry = qry.order_by(Transactions.created_at)
 
-          # pagination
+            # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])
         qry = qry.limit(int(args['limit'])).offset(offset)
 
@@ -355,7 +360,7 @@ api.add_resource(UserProfile, '/<int:id>/profile')
 api.add_resource(UserTopUp, '/transaction')
 api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
-api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')
+api.add_resource(UserNewestTransaction, '/transactions/newest')
 api.add_resource(UserFilterTransactions, '/transactions/filterby')
 api.add_resource(ProductForUser, '/product/list')
 api.add_resource(ProductFilter, '/product/filterby')

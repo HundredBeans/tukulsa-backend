@@ -12,3 +12,4 @@ pytest-cov
 requests
 requests_oauthlib
 flask-cors
+midtransclient

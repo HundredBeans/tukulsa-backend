@@ -36,16 +36,9 @@ try:
 except Exception as e:
     raise e
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
-
-### SQL ALCHEMY CONFIG LOCAL ###
+# ## SQL ALCHEMY CONFIG LOCAL ###
 # mysql_pass = os.environ.get('MYSQL_PASS', '')
-# # mysql_pass = ''
 # try:
 #     env = os.environ.get('FLASK_ENV', 'development')
 #     if env == 'testing':
@@ -57,12 +50,12 @@ manager.add_command('db', MigrateCommand)
 # except Exception as e:
 #     raise e
 
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
-# manager = Manager(app)
-# manager.add_command('db', MigrateCommand)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 ### AFTER REQUEST ###
 @app.after_request

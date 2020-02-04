@@ -5,7 +5,8 @@ from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users, Chat
 from ..transactions.models import *
 from blueprints import db, app
-from mobilepulsa import get_operator
+from mobilepulsa import get_operator, buying_pulsa
+from sqlalchemy import desc
 
 bp_users = Blueprint('users', __name__)
 api = Api(bp_users)
@@ -117,7 +118,7 @@ class UserChat(Resource):
         if args['status_number']:
             chat_field.status_number = bool(args['status_number'] == 'True')
         if args['operator']:
-            chat_field.operator = bool(args['operator'] == 'True')
+            chat_field.operator = args['operator']
         db.session.commit()
 
         # log
@@ -144,8 +145,29 @@ class UserProfile(Resource):
 
 class UserTopUp(Resource):
     # USER TOP UP MOBILE BALANCE
+    #     {
+    #     "data": {
+    #         "ref_id": "order003",
+    #         "status": 0,
+    #         "code": "hindosat5000",
+    #         "hp": "08111111",
+    #         "price": 5990,
+    #         "message": "PROCESS",
+    #         "balance": 9963020,
+    #         "tr_id": 23046,
+    #         "rc": "39"
+    #     }
+    # }
+    # buying_pulsa("order003","085659229599","hindosat5000" )
+    # INPUT user id, product code, phone numer 
+    # field require order id, phone number. product code,  
     def post(self):
-        pass
+        result = buying_pulsa()
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('product_code', location='json', required=True)
+        parser.add_argument('order_id', location='json', required=True)
+        args = parser.parse_args()
 
 
 class UserStatus(Resource):
@@ -188,10 +210,29 @@ class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
     def post(self):
         parser = parser = reqparse.RequestParser()
+        parser.add_argument('page', location='args', default = 1)
+        parser.add_argument('limit', location='args', default = 10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc","asc"), default="a  sc")
         parser.add_argument('operator', location='json', required=True)
+        parser.add_argument("order_by", location="json", help="invalid order-by value", choices=("id", "price"), default="price")
         args = parser.parse_args()
-        selected_products = Product.query.filter(
-            Product.operator.contains(args['operator'])).all()
+        qry = Product.query.filter(
+            Product.operator.contains(args['operator']))
+
+        # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.id))
+            else: qry = qry.order_by(Product.id)
+        elif args["order_by"] == "price":
+            if args["sort"] == "desc": qry = qry.order_by(desc(Product.price))
+            else: qry = qry.order_by(Product.price)
+
+        # pagination
+        offset = (int(args["page"]) - 1)*int(args["limit"])
+        qry = qry.limit(int(args['limit'])).offset(offset)
+        
+        selected_products = qry.all()
+        # print(selected_products)
         result = []
         for product in selected_products:
             marshal_product = marshal(product, Product.response_fileds)
@@ -236,7 +277,7 @@ class GenerateProductList(Resource):
 
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
-api.add_resource(UserTopUp, '/<int:id>/buying')
+api.add_resource(UserTopUp, '/transaction')
 api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
 api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')

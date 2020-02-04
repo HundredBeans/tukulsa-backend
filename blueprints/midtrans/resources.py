@@ -6,6 +6,8 @@ from blueprints import db, app
 import json as JSON
 import midtransclient
 from sqlalchemy import func
+from ..transactions.models import Transactions, Product 
+from ..users.models import Users
 
 bp_midtrans = Blueprint('midtrans', __name__)
 api = Api(bp_midtrans)
@@ -20,23 +22,23 @@ class MidtransCallback(Resource):
 
     def post(self):
         
-        qry=transaction.query(func.max(id))
+        qry=Transaction.query(func.max(id))
         
         parser=reqparse.RequestParser()
-        parser.add_argument('id', location="json")
+       
         parser.add_argument('phoneNum', location="json")
-        parser.add_argument('lineID', location="json")
         parser.add_argument('productName',location="json")
         
         args=parser.parse_args()
         
-        qry_product=product.query.filter_by(name=args['productName'])
+        qry_product=Product.query.filter_by(code=args['productName'])
+        qry_user=Users.query.get(qry.user_id)
 
         snap = midtransclient.Snap(
             is_production=False, #ganti jadi True untuk production
             server_key=username,
             client_key=client_key)
-
+        
         param = {
         "transaction_details": {
             "order_id": "ORDER-{}".format(qry.id),
@@ -51,7 +53,7 @@ class MidtransCallback(Resource):
             "merchant_name":"Tukulsa"
         }],
         "customer_details":{
-            "first_name":args['lineID'],
+            "first_name":qry_user.display_name,
             "phone":args['phoneNum'],
         },
         "enabled_payments":["gopay", "akulaku", "bank transfer", "other_va"],

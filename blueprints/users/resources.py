@@ -158,6 +158,8 @@ class UserTopUp(Resource):
     #     }
     # }
     # buying_pulsa("order003","085659229599","hindosat5000" )
+    # INPUT user id, product code, phone numer 
+    # field require order id, phone number. product code,  
     def post(self):
         result = buying_pulsa()
         parser = parser = reqparse.RequestParser()

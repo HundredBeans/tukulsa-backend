@@ -176,7 +176,7 @@ class UserTopUp(Resource):
         db.session.commit()
 
         # production = delete --TEST--
-        new_transaction.order_id = 'TUKULSAORDER2-{}'.format(
+        new_transaction.order_id = 'TUKULSAORDER4-{}'.format(
             str(new_transaction.id))
         db.session.commit()
 
@@ -263,8 +263,40 @@ class UserFilterTransactions(Resource):
         return result, 200
 
 
+class EditStatusTransaction(Resource):
+    """
+    Edit status transactions after receive callback from midtrans payment or mobilepulsa response
+    Payment Status:
+    --
+    Default : NOTPAID
+    Else : PENDING PAID EXPIRED FAILED
+    Order Status:
+    --
+    Default : PROCESSING
+    Else: PENDING SUCCESS FAILED 
+    """
+    def put(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('payment_status', location='json')
+        parser.add_argument('order_status', location='json')
+        args = parser.parse_args()
+
+        selected_trx = Transactions.query.outerjoin(
+            Users, Transactions.user_id == Users.id).filter(Users.line_id == args['line_id']).filter(Transactions.order_id == args['order_id']).first()
+        if args['payment_status']:
+            selected_trx.payment_status = args['payment_status']
+        if args['order_status']:
+            selected_trx.order_status = args['order_status']
+        db.session.commit()
+        marshal_trx = marshal(selected_trx, Transactions.response_fields)
+
+        return marshal_trx, 200
+
+
 class ProductForUser(Resource):
-    # USER GET ALL PRODUCT LIST
+        # USER GET ALL PRODUCT LIST
     def get(self):
         all_product = Product.query.all()
         result = []
@@ -362,6 +394,7 @@ api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
 api.add_resource(UserNewestTransaction, '/transactions/newest')
 api.add_resource(UserFilterTransactions, '/transactions/filterby')
+api.add_resource(EditStatusTransaction, '/transactions/edit')
 api.add_resource(ProductForUser, '/product/list')
 api.add_resource(ProductFilter, '/product/filterby')
 api.add_resource(UserRootPath, '')

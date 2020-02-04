@@ -46,8 +46,10 @@ class Transactions(db.Model):
     nominal = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
-    payment_status = db.Column(db.Boolean, default=False)
-    order_status = db.Column(db.Boolean, default=False)
+    # PENDING PAID EXPIRED FAILED NOTPAID
+    payment_status = db.Column(db.String(20), default="NOTPAID")
+    # PENDING SUCCESS FAILED PROCESSING
+    order_status = db.Column(db.String(20), default="PROCESSING")
     trx_users = db.relationship(
         'Users', backref='transactions', cascade="all", lazy="joined")
     trx_product = db.relationship(
@@ -65,8 +67,8 @@ class Transactions(db.Model):
         "nominal": fields.Integer,
         "price": fields.Integer,
         "created_at": fields.DateTime,
-        "payment_status": fields.Boolean,
-        "order_status": fields.Boolean
+        "payment_status": fields.String,
+        "order_status": fields.String
     }
 
     def __init__(self, user_id, phone_number, product_id, operator, label, nominal, price, created_at):

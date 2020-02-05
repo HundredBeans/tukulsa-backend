@@ -32,17 +32,18 @@ class MobilePulsaCallback(Resource):
     def post(self):
         # Get Callback JSON
         req_data = request.get_json()
-        order_id = req_data['request']['data']['ref_id']
+        print(req_data)
+        order_id = req_data['data']['ref_id']
         # Query fro specific Transactions obtained from callback
         selected_trx = Transactions.query.filter_by(order_id= order_id).first()
         # Update order status based on callback status
-        if req_data['request']["data"]["status"] == 1:
+        if req_data["data"]["status"] == 1:
             selected_trx.order_status = "SUCCESS"
             db.session.commit()
-        elif req_data['request']["data"]["status"] == 0:
+        elif req_data["data"]["status"] == 0:
             selected_trx.order_status = "PROCESS"
             db.session.commit()
-        elif req_data['request']["data"]["status"] == 2:
+        elif req_data["data"]["status"] == 2:
             selected_trx.order_status = "FAILED"
             db.session.commit()
 

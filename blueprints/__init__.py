@@ -91,6 +91,10 @@ from blueprints.admin.resources import bp_admin
 app.register_blueprint(bp_admin, url_prefix='/admin')
 from blueprints.midtrans.resources import bp_midtrans
 app.register_blueprint(bp_midtrans, url_prefix='/notification/handling')
+
+from blueprints.admin_auth.__init__ import bp_auth
+app.register_blueprint(bp_auth, url_prefix='/auth')
+
 from blueprints.mobilepulsa.resources import bp_mobPulsa
 app.register_blueprint(bp_mobPulsa, url_prefix='/mobilepulsa/callback')
 

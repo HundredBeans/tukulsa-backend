@@ -81,6 +81,9 @@ class Transactions(db.Model):
         self.price = price
         self.created_at = created_at
 
+    
+    
+
 
 class Timedetails(db.Model):
     __tablename__ = "timedetails"

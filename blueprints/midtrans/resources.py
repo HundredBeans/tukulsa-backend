@@ -32,7 +32,7 @@ class MidtransCallback(Resource):
             server_key=username,
             client_key=client_key
         )
-
+        req_data = request.get_json()
         mock_notification = {
             "transaction_time": "2020-02-04 22:03:44",
             "gross_amount": "10950.00",
@@ -50,8 +50,7 @@ class MidtransCallback(Resource):
         }
         # handle notification JSON sent by Midtrans, it auto verify it by doing get status
         # parameter can be Dictionary or String of JSON
-        status_response = api_client.transactions.notification(
-            mock_notification)
+        status_response = api_client.transactions.notification(req_data)
 
         order_id = status_response['order_id']
         transaction_status = status_response['transaction_status']

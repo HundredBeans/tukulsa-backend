@@ -53,6 +53,9 @@ class Transactions(db.Model):
     trx_timedetail = db.relationship(
         'Timedetails', backref='transactions', cascade="delete")
 
+    
+    
+
 
 class Timedetails(db.Model):
     __tablename__ = "timedetails"

@@ -1,6 +1,6 @@
 from blueprints import db
 from flask_restful import fields
-from datetime import datetime
+import datetime
 
 class Admin(db.Model):
     __tablename__="admin"
@@ -8,9 +8,9 @@ class Admin(db.Model):
     line_id=db.Column(db.String(255), nullable=True)
     name=db.Column(db.String(255), nullable=True)
     security_code=db.Column(db.String(255), nullable=True)
-    image=db.Columnn(db.Text, nullable=True)
+    image=db.Column(db.Text, nullable=True)
     created_at=db.Column(db.DateTime, default=datetime.datetime.now)
-    updated_at=db.Column(db.Datetime, onupdate=datetime.datetime.now)
+    updated_at=db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
     response_fields={
         'id':fields.Integer,

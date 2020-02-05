@@ -33,5 +33,5 @@ class Admin(db.Model):
     def __init__(self,line_id, name, security_code, image ):
         self.line_id=line_id
         self.name=name
-        self.security_code=secutity_code
+        self.security_code=security_code
         self.image=image

@@ -8,17 +8,31 @@ api=Api(bp_auth, catch_all_404s=True)
 
 class AdminAuth(Resource):
     def get(self):
+          
         parser=reqparse.RequestParser()
-        parser.add_argument("line_id", location="args", required=True)
+        parser.add_argument("username", location="args", required=True)
+        parser.add_argument("password", location="args", required=True)
+        parser.add_argument("line_id", location="args")
         args=parser.parse_args()
-        
+
         qry=Admin.query.filter_by(line_id= args["line_id"]).first()
-        if qry.line_id == args["line_id"]:
-            admin_data=marshal(qry, Admin.get_jwt_claims)
-            token=create_access_token(identity=args["line_id"], user_claims=admin_data)
-            return {'status':token},200
         
-        else:
+        #Super Admin Login
+        try:
+            if args['username']=="admin" and args["password"]=="woka":
+                token=create_access_token(identity=args['username'], user_claims={"role":"super_admin"})
+                return {"token":token},200
+        except:
+            return {"status":"You don't have access"},403
+        
+        #Another Admin
+        try:
+            if qry.line_id == args["line_id"]:
+                admin_data=marshal(qry, Admin.get_jwt_claims)
+                token=create_access_token(identity=args["line_id"], user_claims=admin_data)
+                return {'status':token},200
+        
+        except:
             return {'status': "You Don't Have Authorization"}, 200
 
 

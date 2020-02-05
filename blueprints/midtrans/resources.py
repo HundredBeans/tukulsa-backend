@@ -62,8 +62,8 @@ class MidtransCallback(Resource):
             order_id, transaction_status, fraud_status))
         # Query table transactions
         selected_trx = Transactions.query.filter_by(order_id= order_id).first()
-        qry_product = Product.query.filter_by(id=selected_trx.product_id).first()
-        pulsa_code = qry_product.code
+        pulsa_code = selected_trx.trx_product.code
+        print(pulsa_code)
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID

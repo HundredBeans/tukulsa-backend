@@ -22,7 +22,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 jwt = JWTManager(app)
 
-## SQL ALCHEMY CONFIG AWS ###
+### SQL ALCHEMY CONFIG AWS ###
 rds_pass = os.environ.get('RDS_PASS')
 rds_link = os.environ.get('RDS_LINK')
 try:
@@ -36,16 +36,9 @@ try:
 except Exception as e:
     raise e
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
 
 # ## SQL ALCHEMY CONFIG LOCAL ###
 # mysql_pass = os.environ.get('MYSQL_PASS', '')
-# # mysql_pass = ''
 # try:
 #     env = os.environ.get('FLASK_ENV', 'development')
 #     if env == 'testing':
@@ -57,12 +50,12 @@ manager.add_command('db', MigrateCommand)
 # except Exception as e:
 #     raise e
 
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
-# manager = Manager(app)
-# manager.add_command('db', MigrateCommand)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 ### AFTER REQUEST ###
 @app.after_request
@@ -98,8 +91,12 @@ from blueprints.admin.resources import bp_admin
 app.register_blueprint(bp_admin, url_prefix='/admin')
 from blueprints.midtrans.resources import bp_midtrans
 app.register_blueprint(bp_midtrans, url_prefix='/notification/handling')
+
 from blueprints.admin_auth.__init__ import bp_auth
 app.register_blueprint(bp_auth, url_prefix='/auth')
+
+from blueprints.mobilepulsa.resources import bp_mobPulsa
+app.register_blueprint(bp_mobPulsa, url_prefix='/mobilepulsa/callback')
 
 
 

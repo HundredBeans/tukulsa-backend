@@ -5,7 +5,10 @@ from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users, Chat
 from ..transactions.models import *
 from blueprints import db, app
-from mobilepulsa import get_operator
+from mobilepulsa import get_operator, buying_pulsa
+from midtrans import midtrans_payment
+from sqlalchemy import desc, asc
+from datetime import datetime
 
 
 bp_users = Blueprint('users', __name__)
@@ -144,9 +147,53 @@ class UserProfile(Resource):
 
 
 class UserTopUp(Resource):
-    # USER TOP UP MOBILE BALANCE
+    # USER GET PAYMENT URL
     def post(self):
-        pass
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('product_code', location='json', required=True)
+        parser.add_argument('phone_number', location='json', required=True)
+        args = parser.parse_args()
+        # butuh selected user
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+        # butuh selected product
+        selected_product = Product.query.filter_by(
+            code=args['product_code']).first()
+        print(selected_product.id)
+        # new transaction
+        new_transaction = Transactions(
+            user_id=selected_user.id,
+            phone_number=args['phone_number'],
+            product_id=selected_product.id,
+            operator=selected_product.operator,
+            label='{} {}'.format(selected_product.operator,
+                                 selected_product.nominal),
+            nominal=selected_product.nominal,
+            price=selected_product.price,
+            created_at=datetime.now()
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+
+        # production = delete --TEST--
+        new_transaction.order_id = 'TUKULSAORDER4-{}'.format(
+            str(new_transaction.id))
+        db.session.commit()
+
+        marshal_trx = marshal(new_transaction, Transactions.response_fields)
+
+        link_payment = midtrans_payment(
+            order_id=new_transaction.order_id,
+            label=new_transaction.label,
+            phone_number=new_transaction.phone_number,
+            display_name=selected_user.display_name,
+            price=new_transaction.price
+        )
+
+        marshal_trx['link_payment'] = link_payment
+
+        # print(marshal_trx)
+        return marshal_trx, 200, {'Content-Type': 'application/json'}
 
 
 class UserStatus(Resource):
@@ -157,24 +204,99 @@ class UserStatus(Resource):
 
 class UserTransactionDetail(Resource):
     # USER GET DETAIL TRANSACTION USING TRANSACTION ID AS INPUT
-    def get(self):
+    def post(self):
         pass
 
 
 class UserNewestTransaction(Resource):
     # USER GET INFO ABOUT LATEST TRANSACTION
-    def get(self):
-        pass
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        args = parser.parse_args()
+
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+
+        selected_trx = Transactions.query.filter_by(
+            user_id=selected_user.id).order_by(desc(Transactions.id)).first()
+
+        marshal_trx = marshal(selected_trx, Transactions.response_fields)
+
+        return marshal_trx, 200
 
 
 class UserFilterTransactions(Resource):
     # USER FILTER TRANSACTIONLIST BY OPERATOR, PRICE, OR TIMESTAMP
-    def get(self):
-        pass
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('page', location='args', default=1)
+        parser.add_argument('limit', location='args', default=20)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=(
+            "desc", "asc"), default="desc")
+        parser.add_argument("order_by", location="json", help="invalid order-by value",
+                            choices=("id"), default="id")
+        args = parser.parse_args()
+
+        # qry = Transactions.query.filter_by(
+        #     Transactions.trx_users.line_id.contains(args['line_id'])).all()
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+        qry = Transactions.query.filter_by(user_id=selected_user.id)
+        # print(qry)
+        # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc":
+                qry = qry.order_by(
+                    desc(Transactions.id))
+            else:
+                qry = qry.order_by(Transactions.id)
+
+            # pagination
+        offset = (int(args["page"]) - 1)*int(args["limit"])
+        qry = qry.limit(int(args['limit'])).offset(offset)
+
+        all_trx = qry.all()
+        result = []
+        for trx in all_trx:
+            marshal_trx = marshal(trx, Transactions.response_fields)
+            result.append(marshal_trx)
+        return result, 200
+
+
+class EditStatusTransaction(Resource):
+    """
+    Edit status transactions after receive callback from midtrans payment or mobilepulsa response
+    Payment Status:
+    --
+    Default : NOTPAID
+    Else : PENDING PAID EXPIRED FAILED
+    Order Status:
+    --
+    Default : PROCESSING
+    Else: PENDING SUCCESS FAILED 
+    """
+    def put(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('order_id', location='json', required=True)
+        parser.add_argument('payment_status', location='json')
+        parser.add_argument('order_status', location='json')
+        args = parser.parse_args()
+
+        selected_trx = Transactions.query.outerjoin(
+            Users, Transactions.user_id == Users.id).filter(Users.line_id == args['line_id']).filter(Transactions.order_id == args['order_id']).first()
+        if args['payment_status']:
+            selected_trx.payment_status = args['payment_status']
+        if args['order_status']:
+            selected_trx.order_status = args['order_status']
+        db.session.commit()
+        marshal_trx = marshal(selected_trx, Transactions.response_fields)
+
+        return marshal_trx, 200
 
 
 class ProductForUser(Resource):
-    # USER GET ALL PRODUCT LIST
+        # USER GET ALL PRODUCT LIST
     def get(self):
         all_product = Product.query.all()
         result = []
@@ -189,10 +311,40 @@ class ProductFilter(Resource):
     # USER GET PRODUCT FILTER Y OPERATOR, PRICE, OR TIMESTAMP
     def post(self):
         parser = parser = reqparse.RequestParser()
+        parser.add_argument('page', location='args', default=1)
+        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument("sort", location="args", help="invalid sort value", choices=(
+            "desc", "asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
+        parser.add_argument("order_by", location="json", help="invalid order-by value",
+                            choices=("id", "code", "price"), default="code")
         args = parser.parse_args()
-        selected_products = Product.query.filter(
-            Product.operator.contains(args['operator'])).all()
+        qry = Product.query.filter(
+            Product.operator.contains(args['operator']))
+
+        # sort and order
+        if args["order_by"] == "id":
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.id))
+            else:
+                qry = qry.order_by(Product.id)
+        elif args["order_by"] == "code":
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.code))
+            else:
+                qry = qry.order_by(Product.code)
+        elif args["order_by"] == "price":
+            if args["sort"] == "desc":
+                qry = qry.order_by(desc(Product.price))
+            else:
+                qry = qry.order_by(Product.price)
+
+        # pagination
+        offset = (int(args["page"]) - 1)*int(args["limit"])
+        qry = qry.limit(int(args['limit'])).offset(offset)
+
+        selected_products = qry.all()
+        # print(selected_products)
         result = []
         for product in selected_products:
             marshal_product = marshal(product, Product.response_fileds)
@@ -237,11 +389,12 @@ class GenerateProductList(Resource):
 
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
-api.add_resource(UserTopUp, '/<int:id>/buying')
+api.add_resource(UserTopUp, '/transaction')
 api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
-api.add_resource(UserNewestTransaction, '/transactions/<int:id>/newest')
+api.add_resource(UserNewestTransaction, '/transactions/newest')
 api.add_resource(UserFilterTransactions, '/transactions/filterby')
+api.add_resource(EditStatusTransaction, '/transactions/edit')
 api.add_resource(ProductForUser, '/product/list')
 api.add_resource(ProductFilter, '/product/filterby')
 api.add_resource(UserRootPath, '')

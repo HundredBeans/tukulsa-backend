@@ -45,8 +45,8 @@ def buying_pulsa(orderID, numberPhone, pulsa_code):
     data_buying = requests.post(
         url, data=json, headers=headers, timeout=30).text
     parsed = JSON.loads(data_buying)
-
-    print(JSON.dumps(parsed, indent=4))
+    return parsed
+    # print(JSON.dumps(parsed, indent=4))
 
 
 def get_order_status(orderID):
@@ -65,8 +65,3 @@ def get_order_status(orderID):
     parsed = JSON.loads(data)
 
     print(JSON.dumps(parsed, indent=4))
-
-
-# get_operator("indosat")
-# buying_pulsa("order003","085659229599","hindosat5000" )
-# get_order_status("order003")

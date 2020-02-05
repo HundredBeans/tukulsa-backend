@@ -68,5 +68,5 @@ def get_order_status(orderID):
 
 
 # get_operator("indosat")
-buying_pulsa("order003","085659229599","hindosat5000" )
-# get_order_status("order003")
+print(buying_pulsa("order679","085659229599","hindosat5000" ))
+# print(get_order_status("order003"))

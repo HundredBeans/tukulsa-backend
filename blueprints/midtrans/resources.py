@@ -60,10 +60,12 @@ class MidtransCallback(Resource):
 
         print('Transaction notification received. Order ID: {0}. Transaction status: {1}. Fraud status: {2}'.format(
             order_id, transaction_status, fraud_status))
+        # Format ORDERID from midtrans to match with transactions table
+        formatted_orderID = order_id.replace('TUKULSA-', '')
         # Query table transactions
-        selected_trx = Transactions.query.filter_by(order_id= order_id).first()
-        qry_product = Product.query.filter_by(id=selected_trx.product_id).first()
-        pulsa_code = qry_product.code
+        selected_trx = Transactions.query.filter_by(order_id= formatted_orderID).first()
+        pulsa_code = selected_trx.trx_product.code
+        print(pulsa_code)
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID

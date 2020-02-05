@@ -55,29 +55,27 @@ class MidtransCallback(Resource):
         order_id = status_response['order_id']
         transaction_status = status_response['transaction_status']
         fraud_status = status_response['fraud_status']
+        status_code = status_response['status_code']
 
         print('Transaction notification received. Order ID: {0}. Transaction status: {1}. Fraud status: {2}'.format(
             order_id, transaction_status, fraud_status))
 
         # Sample transaction_status handling logic
-
-        if transaction_status == 'capture':
-            if fraud_status == 'challenge':
-                # set transaction status on your databaase to 'challenge'
-                print('masuk fraud_status challange')
-                # None
-            elif fraud_status == 'accept':
-                # set transaction status on your databaase to 'success'
-                print('masuk fraud_status accept')
-                # None
-        elif transaction_status == 'cancel' or transaction_status == 'deny' or transaction_status == 'expire':
-            print('masuk cancel or deny')
-            # set transaction status on your databaase to 'failure'
-            # None
-        elif transaction_status == 'pending':
-            print('masuk pending')
-            # set transaction status on your databaase to 'pending' / waiting payment
-            # None
+        if status_code == '200':
+            # Ubah payment status di transaksi jadi PAID
+            print('PAID')
+        elif status_code == '201':
+            # Ubah payment status di transaksi jadi PENDING
+            print('PENDING')
+        elif status_code == '202':
+            # Ubah payment status di transaksi jadi DENIED
+            print('DENIED')
+        elif status_code == '407':
+            # Ubah payment status di transaksi jadi EXPIRED
+            print('EXPIRED')
+        else:
+            print('ERROR')
+            
         return 200, {'Content-Type': 'application/json'}
 
 

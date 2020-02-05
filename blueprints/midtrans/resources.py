@@ -63,15 +63,28 @@ class MidtransCallback(Resource):
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID
+            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
+            selected_trx.payment_status = 'PAID'
+            db.session.commit()
+            # Nembak mobile pulsa
             print('PAID')
         elif status_code == '201':
             # Ubah payment status di transaksi jadi PENDING
+            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
+            selected_trx.payment_status = 'PENDING'
+            db.session.commit()
             print('PENDING')
         elif status_code == '202':
             # Ubah payment status di transaksi jadi DENIED
+            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
+            selected_trx.payment_status = 'DENIED'
+            db.session.commit()
             print('DENIED')
         elif status_code == '407':
             # Ubah payment status di transaksi jadi EXPIRED
+            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
+            selected_trx.payment_status = 'EXPIRED'
+            db.session.commit()
             print('EXPIRED')
         else:
             print('ERROR')

@@ -10,6 +10,7 @@ from ..transactions.models import Transactions, Product
 from ..users.models import Users
 import base64
 from midtrans import midtrans_payment
+from mobilepulsa import buying_pulsa
 
 bp_midtrans = Blueprint('midtrans', __name__)
 api = Api(bp_midtrans)
@@ -59,30 +60,30 @@ class MidtransCallback(Resource):
 
         print('Transaction notification received. Order ID: {0}. Transaction status: {1}. Fraud status: {2}'.format(
             order_id, transaction_status, fraud_status))
-
+        # Query table transactions
+        selected_trx = Transactions.query.filter_by(order_id= order_id).first()
+        qry_product = Product.query.filter_by(id=selected_trx.product_id).first()
+        pulsa_code = qry_product.code
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID
-            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
             selected_trx.payment_status = 'PAID'
             db.session.commit()
             # Nembak mobile pulsa
+            buying_pulsa(order_id, selected_trx.phone_number, pulsa_code)
             print('PAID')
         elif status_code == '201':
             # Ubah payment status di transaksi jadi PENDING
-            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
             selected_trx.payment_status = 'PENDING'
             db.session.commit()
             print('PENDING')
         elif status_code == '202':
             # Ubah payment status di transaksi jadi DENIED
-            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
             selected_trx.payment_status = 'DENIED'
             db.session.commit()
             print('DENIED')
         elif status_code == '407':
             # Ubah payment status di transaksi jadi EXPIRED
-            selected_trx = Transactions.query.filter(Transactions.order_id == order_id).first()
             selected_trx.payment_status = 'EXPIRED'
             db.session.commit()
             print('EXPIRED')

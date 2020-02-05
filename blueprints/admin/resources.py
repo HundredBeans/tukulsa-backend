@@ -109,7 +109,7 @@ class AdminFilterTransaction(Resource):
         "desc", "asc"), default="asc")
     parser.add_argument('operator', location='json', required=True)
     parser.add_argument("order_by", location="json", help="invalid order-by value",
-                        choices=("id", "label", "price"), default="code")
+                        choices=("id", "label", "price"), default="label")
     args = parser.parse_args()
     qry = Transactions.query.filter(
         Product.operator.contains(args['operator']))

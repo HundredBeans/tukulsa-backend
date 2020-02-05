@@ -34,8 +34,10 @@ class MobilePulsaCallback(Resource):
         req_data = request.get_json()
         print(req_data)
         order_id = req_data['data']['ref_id']
+        # Format ORDERID from midtrans to match with transactions table
+        formatted_orderID = order_id.replace('TUKULSA-', '')
         # Query fro specific Transactions obtained from callback
-        selected_trx = Transactions.query.filter_by(order_id= order_id).first()
+        selected_trx = Transactions.query.filter_by(order_id= formatted_orderID).first()
         # Update order status based on callback status
         if req_data["data"]["status"] == 1:
             selected_trx.order_status = "SUCCESS"

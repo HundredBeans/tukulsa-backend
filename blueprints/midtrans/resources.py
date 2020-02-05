@@ -64,8 +64,7 @@ class MidtransCallback(Resource):
         formatted_orderID = order_id.replace('TUKULSA-', '')
         # Query table transactions
         selected_trx = Transactions.query.filter_by(order_id= formatted_orderID).first()
-        pulsa_code = selected_trx.trx_product.code
-        print(pulsa_code)
+        pulsa_code = Product.query.filter_by(id= selected_trx.product_id).first().code
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID

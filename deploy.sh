@@ -4,6 +4,7 @@ eval "$(ssh-agent -s)" &&
 ssh-add -k ~/.ssh/id_rsa &&
 cd ~/travis/tukulsa-backend
 git pull
+mkdir storage && cd storage && mkdir logs
 
 source ~/.profile
 echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin

@@ -231,6 +231,7 @@ class UserFilterTransactions(Resource):
     def post(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('order_id', location='json')
         parser.add_argument('page', location='args', default=1)
         parser.add_argument('limit', location='args', default=20)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
@@ -251,6 +252,12 @@ class UserFilterTransactions(Resource):
                     desc(Transactions.id))
             else:
                 qry = qry.order_by(Transactions.id)
+        elif args["order_id"] == "id":
+            if args["sort"] == "desc":
+                qry = qry.order_by(
+                    desc(Transactions.order_id))
+            else:
+                qry = qry.order_by(Transactions.order_id)
 
             # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])

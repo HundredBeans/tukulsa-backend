@@ -15,10 +15,14 @@ from mobilepulsa import buying_pulsa
 bp_midtrans = Blueprint('midtrans', __name__)
 api = Api(bp_midtrans)
 
-username = "SB-Mid-server-45Q3wZH3LKaU6h0BvqRV-Xhu"
-client_key = "SB-Mid-client-tnH7ODrMQGMO0zvn"
-# ganti jadi production LINK (https://app.midtrans.com/snap/v1/transactions)
-HOST = "https://app.sandbox.midtrans.com/snap/v1/transactions"
+username = os.getenv('SERVER_KEY', None)
+client_key = os.getenv('CLIENT_KEY', None)
+HOST = os.getenv('HOST', None)
+STATE = os.getenv('IS_PRODUCTION', None)
+if STATE == 'True':
+    STATE = True
+elif STATE == 'False':
+    STATE = False
 
 
 class MidtransCallback(Resource):
@@ -28,7 +32,7 @@ class MidtransCallback(Resource):
     def post(self):
         # initialize api client object
         api_client = midtransclient.CoreApi(
-            is_production=False,
+            is_production=STATE,
             server_key=username,
             client_key=client_key
         )
@@ -68,6 +72,7 @@ class MidtransCallback(Resource):
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID
             selected_trx.payment_status = 'LUNAS'
+            selected_trx.order_status = 'PROSES'
             db.session.commit()
             # Nembak mobile pulsa
             buying_pulsa(order_id, selected_trx.phone_number, pulsa_code)

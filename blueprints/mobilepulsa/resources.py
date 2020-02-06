@@ -41,14 +41,14 @@ class MobilePulsaCallback(Resource):
         selected_trx = Transactions.query.filter_by(order_id= formatted_orderID).first()
         # Update order status based on callback status
         if req_data["data"]["status"] == '1':
-            selected_trx.order_status = "SUCCESS"
+            selected_trx.order_status = "SUKSES"
             db.session.commit()
             print(selected_trx.order_status)
         elif req_data["data"]["status"] == '0':
-            selected_trx.order_status = "PROCESS"
+            selected_trx.order_status = "PROSES"
             db.session.commit()
         elif req_data["data"]["status"] == '2':
-            selected_trx.order_status = "FAILED"
+            selected_trx.order_status = "GAGAL"
             db.session.commit()
 
         return req_data, 200, {'Content-Type': 'application/json'}

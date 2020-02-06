@@ -36,5 +36,8 @@ class AdminAuth(Resource):
         except:
             return {'status': "You Don't Have Authorization"}, 200
 
+    def options(self):
+        return 200
+
 
 api.add_resource(AdminAuth, '')

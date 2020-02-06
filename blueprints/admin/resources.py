@@ -65,6 +65,9 @@ class SuperAdmin(Resource):
     db.session.commit()
 
     return {'status':"Data Successfully Updated"}, 200
+  
+  def options(self):
+        return 200
 
 # class AdminLogin(Resource):
 #   # @jwt_required
@@ -103,6 +106,9 @@ class AdminSecurity(Resource):
     qry.security_code=code
     db.session.commit()
     return {"code":code}, 200
+  
+  def options(self):
+        return 200
 
 # ADMIN MANUAL POST TRANSACTION
 class AdminPostTransaction(Resource):
@@ -134,6 +140,9 @@ class AdminPostTransaction(Resource):
     else:
       return {'status':"transaction detail is already existed"},403
 
+  def options(self):
+      return 200
+
 # ADMIN GET ALL TRANSACTIONS BY USERID
 class AdminGetTransactionId(Resource):
   @jwt_required
@@ -144,6 +153,9 @@ class AdminGetTransactionId(Resource):
       return{'status':'NOT FOUND'}, 404
     else:
       return marshal(qry, Transactions.response_fields),200
+  
+  def options(self,id):
+        return 200
 
 # ADMIN GET ALL TRANSACTION HISTORY
 class AdminGetTransactionList(Resource):
@@ -164,10 +176,13 @@ class AdminGetTransactionList(Resource):
         rows.append(marshal(row, Transactions.response_fields))
     return rows, 200
 
+  def options(self):
+        return 200
+
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
@@ -182,13 +197,9 @@ class AdminFilterTransaction(Resource):
     
     
     qry = Transactions.query.filter_by(operator=args['operator'])
-    # qry_coba=qry.filter(func.date_part("YEAR", "2020-02-05"))
-    # for row in qry_coba:
-      # print("BAM", row[0])
-    # print("SABAR", qry)
-    # qry_coba=qry.created_at.strftime("%d")
-    # print("COBA TERUS", qry_coba)
-    # sort and orde
+    # qry_coba=qry.filter(Transactions.created_at.like('%2018%'))
+  
+   
     if args["order_by"] == "id":
         if args["sort"] == "desc":
             qry = qry.order_by(Transactions.id.desc())
@@ -219,6 +230,9 @@ class AdminFilterTransaction(Resource):
         result.append(marshal_transaction)
     print(result)
     return result, 200, {'Content-Type': 'application/json'}
+
+  def options(self):
+        return 200
   
 
 # ADMIN GET ALL PRODUCT LIST
@@ -239,6 +253,9 @@ class AdminProductList(Resource):
     for row in qry.limit(args['rp']).offset(offset).all():
         rows.append(marshal(row, Product.response_fields))
     return rows, 200
+  
+  def options(self):
+        return 200
 
 # ADMIN GET ALL PRODUCT LIST AND FILTER BY OPERATOR, PRICE, AND TIMESTAMP
 class AdminFilterProduct(Resource):
@@ -284,6 +301,9 @@ class AdminFilterProduct(Resource):
           result.append(marshal_product)
       print(result)
       return result, 200, {'Content-Type': 'application/json'}
+
+  def options(self):
+        return 200
 
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')

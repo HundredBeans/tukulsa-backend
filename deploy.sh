@@ -11,4 +11,4 @@ echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-st
 docker stop tukulsaBE
 docker rm tukulsaBE
 docker rmi daffa99/containerd:tukulsaBE
-docker run -d --name tukulsaBE -p 5000:5000 daffa99/containerd:
+docker run -d --name tukulsaBE -p 5000:5000 daffa99/containerd:tukulsaBE

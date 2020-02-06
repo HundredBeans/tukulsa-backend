@@ -166,13 +166,8 @@ class AdminFilterTransaction(Resource):
     # parser.add_argument("time", location="args" )
     args = parser.parse_args()
     
-    num_days=calendar.monthrange(2020, 1)[1]
-    start_date = datetime.date(2020, 1, 1)
-    end_date = datetime.date(2020, 1, num_days)
 
-    qry = Transactions.query(Event).filter()
-
-    # qry = Transactions.query.filter_by(operator=args['operator'])
+    qry = Transactions.query.filter_by(operator=args['operator'])
     #
     # sort and order
     if args["order_by"] == "id":
@@ -267,7 +262,7 @@ class AdminFilterProduct(Resource):
       # print(selected_products)
       result = []
       for product in selected_products:
-          marshal_product = marshal(product, Product.response_fields)
+          marshal_product = marshal(product, Product.response_fileds)
           result.append(marshal_product)
       print(result)
       return result, 200, {'Content-Type': 'application/json'}

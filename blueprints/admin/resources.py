@@ -85,7 +85,7 @@ class SuperAdmin(Resource):
 
 # ADMIN GET RANDOM SECURITY CODE
 class AdminSecurity(Resource):
-  @jwt_required
+
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("line_id", location="args")

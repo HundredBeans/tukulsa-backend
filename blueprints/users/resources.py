@@ -220,7 +220,6 @@ class UserNewestTransaction(Resource):
 
         selected_trx = Transactions.query.filter_by(
             user_id=selected_user.id).order_by(desc(Transactions.id)).first()
-        selected_trx.created_at.replace(tzinfo=)
         # selected_trx.created_at = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
         marshal_trx = marshal(selected_trx, Transactions.response_fields)
         marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")

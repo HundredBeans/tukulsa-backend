@@ -10,9 +10,9 @@ class AdminAuth(Resource):
     def get(self):
           
         parser=reqparse.RequestParser()
-        parser.add_argument("username", location="args", required=True)
-        parser.add_argument("password", location="args", required=True)
-        parser.add_argument("line_id", location="args")
+        parser.add_argument("username", location="args")
+        parser.add_argument("password", location="args")
+        parser.add_argument("security_code", location="args")
         args=parser.parse_args()
 
         qry=Admin.query.filter_by(line_id= args["line_id"]).first()
@@ -27,7 +27,7 @@ class AdminAuth(Resource):
         
         #Another Admin
         try:
-            if qry.line_id == args["line_id"]:
+            if qry.security_code == args["security_code"]:
                 admin_data=marshal(qry, Admin.get_jwt_claims)
                 token=create_access_token(identity=args["line_id"], user_claims=admin_data)
                 return {'status':token},200

@@ -312,12 +312,12 @@ class ProductFilter(Resource):
     def post(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('page', location='args', default=1)
-        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument('limit', location='args', default=20)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
             "desc", "asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
         parser.add_argument("order_by", location="json", help="invalid order-by value",
-                            choices=("id", "code", "price"), default="code")
+                            choices=("id", "code", "price"), default="id")
         args = parser.parse_args()
         qry = Product.query.filter(
             Product.operator.contains(args['operator']))

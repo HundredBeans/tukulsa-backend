@@ -7,6 +7,8 @@ from sqlalchemy import func
 from .models import Admin
 import string
 import random
+import calendar
+import datetime
 
 bp_admin = Blueprint('admin', __name__)
 api = Api(bp_admin)
@@ -160,9 +162,13 @@ class AdminFilterTransaction(Resource):
     parser.add_argument('limit', location='args', default=10)
     parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
     parser.add_argument('operator', location='args', required=True)
-    parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price"), default="label")
-    
+    parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price", "created_at"), default="label")
+    # parser.add_argument("time", location="args" )
     args = parser.parse_args()
+    
+    num_days=calendar.monthrange(2020, 1)[1]
+    start_date = datetime.date(2020, 1, 1)
+    end_date = datetime.date(2020, 1, num_days)
 
     qry = Transactions.query.filter_by(operator=args['operator'])
    
@@ -182,17 +188,22 @@ class AdminFilterTransaction(Resource):
             qry = qry.order_by(Transactions.price.desc())
         else:
             qry = qry.order_by(Transactions.price)
+    elif args["order_by"]=="created_at":
+      if args["sort"]=="desc":
+        qry=qry.order_by(Transactions.created_at.desc())
+      else:
+        qry=qry.order_by(Transactions.created_at)
 
     # pagination
     offset = (int(args["page"]) - 1)*int(args["limit"])
     qry = qry.limit(int(args['limit'])).offset(offset)
 
-    selected_products = qry.all()
+    selected_transactions = qry.all()
     # print(selected_products)
     result = []
-    for product in selected_products:
-        marshal_product = marshal(product, Product.response_fileds)
-        result.append(marshal_product)
+    for transaction in selected_transactions:
+        marshal_transaction = marshal(transaction, Transactions.response_fields)
+        result.append(marshal_transaction)
     print(result)
     return result, 200, {'Content-Type': 'application/json'}
   
@@ -225,7 +236,7 @@ class AdminFilterProduct(Resource):
           "desc", "asc"), default="asc")
       parser.add_argument('operator', location='args', required=True)
       parser.add_argument("order_by", location="args", help="invalid order-by value",
-                          choices=("id", "code", "price"), default="code")
+                          choices=("id", "code", "price"), default="id")
       args = parser.parse_args()
       qry = Product.query.filter_by(operator=args['operator'])
 
@@ -254,7 +265,7 @@ class AdminFilterProduct(Resource):
       # print(selected_products)
       result = []
       for product in selected_products:
-          marshal_product = marshal(product, Product.response_fileds)
+          marshal_product = marshal(product, Product.response_fields)
           result.append(marshal_product)
       print(result)
       return result, 200, {'Content-Type': 'application/json'}

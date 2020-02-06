@@ -3,7 +3,7 @@ from flask_restful import Api, Resource, marshal, reqparse
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_claims, jwt_required
 from ..transactions.models import *
 from blueprints import db, internal_required
-from sqlalchemy import func
+from sqlalchemy import func, distinct
 from .models import Admin
 import string
 import random
@@ -167,7 +167,7 @@ class AdminGetTransactionList(Resource):
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
@@ -175,16 +175,16 @@ class AdminFilterTransaction(Resource):
     parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
     parser.add_argument('operator', location='args', required=True)
     parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price", "created_at"), default="label")
-    # parser.add_argument("year", location="args" )
-    # parser.add_argument("month", location="args" )
-    # parser.add_argument("date", location="args" )
+    parser.add_argument("year", location="args" )
+    parser.add_argument("month", location="args" )
+    parser.add_argument("date", location="args" )
     args = parser.parse_args()
     
     
     qry = Transactions.query.filter_by(operator=args['operator'])
-    # qry_coba=qry.filter(func.extract("year", "2018-12-02"))
-
-    # print("BAM", qry_coba)
+    # qry_coba=qry.filter(func.date_part("YEAR", "2020-02-05"))
+    # for row in qry_coba:
+      # print("BAM", row[0])
     # print("SABAR", qry)
     # qry_coba=qry.created_at.strftime("%d")
     # print("COBA TERUS", qry_coba)

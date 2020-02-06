@@ -13,6 +13,7 @@ class AdminAuth(Resource):
         parser.add_argument("username", location="args")
         parser.add_argument("password", location="args")
         parser.add_argument("security_code", location="args")
+        parser.add_argument("line_id",location="args")
         args=parser.parse_args()
 
         qry=Admin.query.filter_by(line_id= args["line_id"]).first()

@@ -9,6 +9,7 @@ from mobilepulsa import get_operator, buying_pulsa
 from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
+import pytz import timezone
 
 
 bp_users = Blueprint('users', __name__)
@@ -170,7 +171,7 @@ class UserTopUp(Resource):
                                  selected_product.nominal),
             nominal=selected_product.nominal,
             price=selected_product.price,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone('Asia/Jakarta'))
         )
         db.session.add(new_transaction)
         db.session.commit()
@@ -219,6 +220,7 @@ class UserNewestTransaction(Resource):
 
         selected_trx = Transactions.query.filter_by(
             user_id=selected_user.id).order_by(desc(Transactions.id)).first()
+        selected_trx.created_at.replace(tzinfo=)
         # selected_trx.created_at = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
         marshal_trx = marshal(selected_trx, Transactions.response_fields)
         marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")

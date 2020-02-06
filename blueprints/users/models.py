@@ -8,22 +8,20 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     line_id = db.Column(db.String(255), nullable=False, unique=True)
     display_name = db.Column(db.String(255), nullable=False)
-    user_status = db.Column(db.String(255), nullable=False)
     user_transactions = db.relationship(
-        'Transactions', backref='users', lazy='dynamic')
-    user_chat = db.relationship('Chat', backref='users')
+        'Transactions', backref='users', cascade="all, delete", lazy='dynamic')
+    user_chat = db.relationship(
+        'Chat', backref='users', cascade="all, delete", lazy="joined")
 
     response_fileds = {
         'id': fields.Integer,
         'display_name': fields.String,
         'line_id': fields.String,
-        'user_status': fields.String
     }
 
-    def __init__(self, line_id, display_name, user_status):
+    def __init__(self, line_id, display_name):
         self.line_id = line_id
         self.display_name = display_name
-        self.user_status = user_status
 
 
 class Chat(db.Model):
@@ -35,6 +33,7 @@ class Chat(db.Model):
     status_nominal = db.Column(db.Boolean, default=False)
     phone_number = db.Column(db.String(14), default=None)
     nominal = db.Column(db.Integer, default=None)
+    operator = db.Column(db.String(15), default=None)
 
     response_fileds = {
         'id': fields.Integer,
@@ -42,7 +41,8 @@ class Chat(db.Model):
         'status_number': fields.Boolean,
         'status_nominal': fields.Boolean,
         'phone_number': fields.String,
-        'nominal': fields.Integer
+        'nominal': fields.Integer,
+        'operator': fields.String
     }
 
     def __init__(self, chat_userid):

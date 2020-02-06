@@ -232,6 +232,7 @@ class UserFilterTransactions(Resource):
     def post(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('order_id', location='json')
         parser.add_argument('page', location='args', default=1)
         parser.add_argument('limit', location='args', default=20)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
@@ -245,6 +246,7 @@ class UserFilterTransactions(Resource):
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
         qry = Transactions.query.filter_by(user_id=selected_user.id)
         # print(qry)
+        if args['order_id']: qry = qry.filter_by(order_id=args['order_id'])
         # sort and order
         if args["order_by"] == "id":
             if args["sort"] == "desc":

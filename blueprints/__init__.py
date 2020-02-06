@@ -36,16 +36,9 @@ try:
 except Exception as e:
     raise e
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
-
-### SQL ALCHEMY CONFIG LOCAL ###
+# ## SQL ALCHEMY CONFIG LOCAL ###
 # mysql_pass = os.environ.get('MYSQL_PASS', '')
-# # mysql_pass = ''
 # try:
 #     env = os.environ.get('FLASK_ENV', 'development')
 #     if env == 'testing':
@@ -57,12 +50,28 @@ manager.add_command('db', MigrateCommand)
 # except Exception as e:
 #     raise e
 
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
-# manager = Manager(app)
-# manager.add_command('db', MigrateCommand)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
+
+#internal super admin
+
+def internal_required(fn):
+    @wraps(fn)
+    def wrapper (*args,**kwargs):
+        verify_jwt_in_request()
+        claims=get_jwt_claims()
+        try:
+            if not claims['role']:
+                pass
+        except:
+            return {'status':'FORBIDDEN', 'message':'Super Administrator Only'}, 403
+        else:
+            return fn(*args,**kwargs)
+    return wrapper
 
 ### AFTER REQUEST ###
 @app.after_request
@@ -98,6 +107,12 @@ from blueprints.admin.resources import bp_admin
 app.register_blueprint(bp_admin, url_prefix='/admin')
 from blueprints.midtrans.resources import bp_midtrans
 app.register_blueprint(bp_midtrans, url_prefix='/notification/handling')
+
+from blueprints.admin_auth.__init__ import bp_auth
+app.register_blueprint(bp_auth, url_prefix='/auth')
+
+from blueprints.mobilepulsa.resources import bp_mobPulsa
+app.register_blueprint(bp_mobPulsa, url_prefix='/mobilepulsa/callback')
 
 
 

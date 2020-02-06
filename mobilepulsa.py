@@ -3,9 +3,11 @@
 import hashlib
 import json as JSON
 import requests
+import os
 
-username = "085659229599"
-password = "9415e33f6d2098d7"
+username = os.getenv('MOBILEPULSA_USERNAME', None)
+password = os.getenv('MOBILEPULSA_PASSWORD', None)
+base_url = os.getenv('BASE_URL', None)
 
 
 def get_operator(operator):
@@ -18,7 +20,7 @@ def get_operator(operator):
         \"sign\"     : \"""" + signature + """\"
     }"""
 
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index/pulsa/"+operator
+    url = "{}/pulsa/{}".format(base_url, operator)
 
     headers = {'content-type': 'application/json'}
 
@@ -31,7 +33,7 @@ def get_operator(operator):
 def buying_pulsa(orderID, numberPhone, pulsa_code):
     gabung = username+password+orderID
     signature = hashlib.md5(gabung.encode()).hexdigest()
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index"
+    url = base_url
     headers = {'content-type': 'application/json'}
 
     json = """{
@@ -45,14 +47,14 @@ def buying_pulsa(orderID, numberPhone, pulsa_code):
     data_buying = requests.post(
         url, data=json, headers=headers, timeout=30).text
     parsed = JSON.loads(data_buying)
-
-    print(JSON.dumps(parsed, indent=4))
+    return parsed
+    # print(JSON.dumps(parsed, indent=4))
 
 
 def get_order_status(orderID):
     gabung = username+password+orderID
     signature = hashlib.md5(gabung.encode()).hexdigest()
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index"
+    url = base_url
     headers = {'content-type': 'application/json'}
 
     json = """{
@@ -65,8 +67,3 @@ def get_order_status(orderID):
     parsed = JSON.loads(data)
 
     print(JSON.dumps(parsed, indent=4))
-
-
-# get_operator("indosat")
-# buying_pulsa("order003","085659229599","hindosat5000" )
-# get_order_status("order003")

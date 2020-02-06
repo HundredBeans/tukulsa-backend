@@ -9,9 +9,9 @@ class Users(db.Model):
     line_id = db.Column(db.String(255), nullable=False, unique=True)
     display_name = db.Column(db.String(255), nullable=False)
     user_transactions = db.relationship(
-        'Transactions', backref='users', cascade="all, delete-orphan", lazy='dynamic')
+        'Transactions', backref='users', cascade="all, delete", lazy='dynamic')
     user_chat = db.relationship(
-        'Chat', backref='users', cascade="all, delete-orphan")
+        'Chat', backref='users', cascade="all, delete", lazy="joined")
 
     response_fileds = {
         'id': fields.Integer,

@@ -219,8 +219,9 @@ class UserNewestTransaction(Resource):
 
         selected_trx = Transactions.query.filter_by(
             user_id=selected_user.id).order_by(desc(Transactions.id)).first()
-
+        # selected_trx.created_at = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
         marshal_trx = marshal(selected_trx, Transactions.response_fields)
+        marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
 
         return marshal_trx, 200
 
@@ -259,6 +260,7 @@ class UserFilterTransactions(Resource):
         result = []
         for trx in all_trx:
             marshal_trx = marshal(trx, Transactions.response_fields)
+            marshal_trx['created_at'] = trx.created_at.strftime("%a %d %b %Y %H:%M")
             result.append(marshal_trx)
         return result, 200
 
@@ -291,6 +293,8 @@ class EditStatusTransaction(Resource):
             selected_trx.order_status = args['order_status']
         db.session.commit()
         marshal_trx = marshal(selected_trx, Transactions.response_fields)
+        marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
+
 
         return marshal_trx, 200
 

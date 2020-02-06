@@ -170,8 +170,10 @@ class AdminFilterTransaction(Resource):
     start_date = datetime.date(2020, 1, 1)
     end_date = datetime.date(2020, 1, num_days)
 
-    qry = Transactions.query.filter_by(operator=args['operator'])
-   
+    qry = Transactions.query(Event).filter()
+
+    # qry = Transactions.query.filter_by(operator=args['operator'])
+    #
     # sort and order
     if args["order_by"] == "id":
         if args["sort"] == "desc":

@@ -9,7 +9,7 @@ from mobilepulsa import get_operator, buying_pulsa
 from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
-import pytz import timezone
+from pytz import timezone
 
 
 bp_users = Blueprint('users', __name__)

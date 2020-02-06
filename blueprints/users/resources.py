@@ -81,6 +81,9 @@ class UserRootPath(Resource):
 
         return result, 200, {'Content-Type': 'application/json'}
 
+    def options(self):
+        return 200
+
 
 class UserChat(Resource):
     # GET BY LINE USER ID
@@ -130,11 +133,16 @@ class UserChat(Resource):
         marshal_chat = marshal(chat_field, Chat.response_fileds)
         return marshal_chat, 200, {'Content-Type': 'application/json'}
 
+    def options(self):
+        return 200
+
 
 class UserById(Resource):
     # USER GET SELF TRANSACTION HISTORY
     def get(self):
         pass
+    def options(self):
+        return 200
 
 
 class UserProfile(Resource):
@@ -145,6 +153,8 @@ class UserProfile(Resource):
     def post(self):
         pass
 
+    def options(self):
+        return 200
 
 class UserTopUp(Resource):
     # USER GET PAYMENT URL
@@ -194,6 +204,9 @@ class UserTopUp(Resource):
 
         # print(marshal_trx)
         return marshal_trx, 200, {'Content-Type': 'application/json'}
+    
+    def options(self):
+        return 200
 
 
 class UserStatus(Resource):
@@ -201,11 +214,17 @@ class UserStatus(Resource):
     def get(self):
         pass
 
+    def options(self):
+        return 200
+
 
 class UserTransactionDetail(Resource):
     # USER GET DETAIL TRANSACTION USING TRANSACTION ID AS INPUT
     def post(self):
         pass
+
+    def options(self):
+        return 200
 
 
 class UserNewestTransaction(Resource):
@@ -224,6 +243,9 @@ class UserNewestTransaction(Resource):
         marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
 
         return marshal_trx, 200
+
+    def options(self):
+        return 200
 
 
 class UserFilterTransactions(Resource):
@@ -264,6 +286,9 @@ class UserFilterTransactions(Resource):
             result.append(marshal_trx)
         return result, 200
 
+    def options(self):
+        return 200
+
 
 class EditStatusTransaction(Resource):
     """
@@ -274,7 +299,7 @@ class EditStatusTransaction(Resource):
     Else : PENDING PAID EXPIRED FAILED
     Order Status:
     --
-    Default : PROCESSING
+    Default : NOT PROCESSING
     Else: PENDING SUCCESS FAILED 
     """
     def put(self):
@@ -297,6 +322,9 @@ class EditStatusTransaction(Resource):
 
 
         return marshal_trx, 200
+    
+    def options(self):
+        return 200
 
 
 class ProductForUser(Resource):
@@ -309,6 +337,9 @@ class ProductForUser(Resource):
             result.append(marshal_product)
 
         return result, 200, {'Content-Type': 'application/json'}
+    
+    def options(self):
+        return 200
 
 
 class ProductFilter(Resource):
@@ -356,6 +387,9 @@ class ProductFilter(Resource):
         print(result)
         return result, 200, {'Content-Type': 'application/json'}
 
+    def options(self):
+        return 200
+
 
 class GenerateProductList(Resource):
     # GET ALL PRODUCT FROM API MOBILE PULSA AND APPEND TO NEW TABLE PROUDCT
@@ -389,6 +423,9 @@ class GenerateProductList(Resource):
                     db.session.add(new_product)
                     db.session.commit()
         return {'status': 'oke'}, 200
+
+    def options(self):
+        return 200
 
 
 api.add_resource(UserById, '/<int:id>')

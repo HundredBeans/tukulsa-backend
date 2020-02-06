@@ -245,6 +245,7 @@ class UserFilterTransactions(Resource):
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
         qry = Transactions.query.filter_by(user_id=selected_user.id)
         # print(qry)
+        if args['order_id']: qry = qry.filter_by(order_id=args['order_id'])
         # sort and order
         if args["order_by"] == "id":
             if args["sort"] == "desc":
@@ -252,12 +253,6 @@ class UserFilterTransactions(Resource):
                     desc(Transactions.id))
             else:
                 qry = qry.order_by(Transactions.id)
-        elif args["order_id"] == "id":
-            if args["sort"] == "desc":
-                qry = qry.order_by(
-                    desc(Transactions.order_id))
-            else:
-                qry = qry.order_by(Transactions.order_id)
 
             # pagination
         offset = (int(args["page"]) - 1)*int(args["limit"])

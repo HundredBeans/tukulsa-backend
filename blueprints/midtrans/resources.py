@@ -10,6 +10,7 @@ from ..transactions.models import Transactions, Product
 from ..users.models import Users
 import base64
 from midtrans import midtrans_payment
+from mobilepulsa import buying_pulsa
 
 bp_midtrans = Blueprint('midtrans', __name__)
 api = Api(bp_midtrans)
@@ -31,7 +32,7 @@ class MidtransCallback(Resource):
             server_key=username,
             client_key=client_key
         )
-
+        req_data = request.get_json()
         mock_notification = {
             "transaction_time": "2020-02-04 22:03:44",
             "gross_amount": "10950.00",
@@ -49,35 +50,46 @@ class MidtransCallback(Resource):
         }
         # handle notification JSON sent by Midtrans, it auto verify it by doing get status
         # parameter can be Dictionary or String of JSON
-        status_response = api_client.transactions.notification(
-            mock_notification)
+        status_response = api_client.transactions.notification(req_data)
 
         order_id = status_response['order_id']
         transaction_status = status_response['transaction_status']
         fraud_status = status_response['fraud_status']
+        status_code = status_response['status_code']
 
         print('Transaction notification received. Order ID: {0}. Transaction status: {1}. Fraud status: {2}'.format(
             order_id, transaction_status, fraud_status))
-
+        # Format ORDERID from midtrans to match with transactions table
+        formatted_orderID = order_id.replace('TUKULSA-', '')
+        # Query table transactions
+        selected_trx = Transactions.query.filter_by(order_id= formatted_orderID).first()
+        pulsa_code = Product.query.filter_by(id= selected_trx.product_id).first().code
         # Sample transaction_status handling logic
-
-        if transaction_status == 'capture':
-            if fraud_status == 'challenge':
-                # set transaction status on your databaase to 'challenge'
-                print('masuk fraud_status challange')
-                # None
-            elif fraud_status == 'accept':
-                # set transaction status on your databaase to 'success'
-                print('masuk fraud_status accept')
-                # None
-        elif transaction_status == 'cancel' or transaction_status == 'deny' or transaction_status == 'expire':
-            print('masuk cancel or deny')
-            # set transaction status on your databaase to 'failure'
-            # None
-        elif transaction_status == 'pending':
-            print('masuk pending')
-            # set transaction status on your databaase to 'pending' / waiting payment
-            # None
+        if status_code == '200':
+            # Ubah payment status di transaksi jadi PAID
+            selected_trx.payment_status = 'PAID'
+            db.session.commit()
+            # Nembak mobile pulsa
+            buying_pulsa(order_id, selected_trx.phone_number, pulsa_code)
+            print('PAID')
+        elif status_code == '201':
+            # Ubah payment status di transaksi jadi PENDING
+            selected_trx.payment_status = 'PENDING'
+            db.session.commit()
+            print('PENDING')
+        elif status_code == '202':
+            # Ubah payment status di transaksi jadi DENIED
+            selected_trx.payment_status = 'DENIED'
+            db.session.commit()
+            print('DENIED')
+        elif status_code == '407':
+            # Ubah payment status di transaksi jadi EXPIRED
+            selected_trx.payment_status = 'EXPIRED'
+            db.session.commit()
+            print('EXPIRED')
+        else:
+            print('ERROR')
+            
         return 200, {'Content-Type': 'application/json'}
 
 

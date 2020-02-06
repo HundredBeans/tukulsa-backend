@@ -65,8 +65,3 @@ def get_order_status(orderID):
     parsed = JSON.loads(data)
 
     print(JSON.dumps(parsed, indent=4))
-
-
-# get_operator("indosat")
-buying_pulsa("order003","085659229599","hindosat5000" )
-# get_order_status("order003")

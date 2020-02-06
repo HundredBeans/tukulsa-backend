@@ -9,6 +9,7 @@ from mobilepulsa import get_operator, buying_pulsa
 from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
+from pytz import timezone
 
 
 bp_users = Blueprint('users', __name__)
@@ -170,7 +171,7 @@ class UserTopUp(Resource):
                                  selected_product.nominal),
             nominal=selected_product.nominal,
             price=selected_product.price,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone('Asia/Jakarta'))
         )
         db.session.add(new_transaction)
         db.session.commit()
@@ -318,12 +319,12 @@ class ProductFilter(Resource):
     def post(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('page', location='args', default=1)
-        parser.add_argument('limit', location='args', default=10)
+        parser.add_argument('limit', location='args', default=20)
         parser.add_argument("sort", location="args", help="invalid sort value", choices=(
             "desc", "asc"), default="asc")
         parser.add_argument('operator', location='json', required=True)
         parser.add_argument("order_by", location="json", help="invalid order-by value",
-                            choices=("id", "code", "price"), default="code")
+                            choices=("id", "code", "price"), default="id")
         args = parser.parse_args()
         qry = Product.query.filter(
             Product.operator.contains(args['operator']))

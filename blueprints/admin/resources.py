@@ -30,7 +30,7 @@ class SuperAdmin(Resource):
     db.session.commit()
 
     return marshal(admin_add, Admin.response_fields), 200
-  # @jwt_required
+  @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument("id", location="json")
@@ -66,28 +66,32 @@ class SuperAdmin(Resource):
 
     return {'status':"Data Successfully Updated"}, 200
 
-class AdminLogin(Resource):
-  # @jwt_required
-  def post(self):
+# class AdminLogin(Resource):
+#   # @jwt_required
+#   def post(self):
 
-    parser=reqparse.RequestParser()
-    parser.add_argument("security_code", location="json")
-    args=parser.parse_args()
+#     parser=reqparse.RequestParser()
+#     parser.add_argument("security_code", location="json")
+#     args=parser.parse_args()
 
-    qry=Admin.query.filter_by(security_code=args['security_code']).first()
+#     qry=Admin.query.filter_by(security_code=args['security_code']).first()
 
-    if qry.line_id==get_jwt_claims()['line_id']:
-      #login success
-      return {'status':"Login success"},200
-    else:
-      return {'status':"Security code is invalid"},403
+#     if qry.line_id==get_jwt_claims()['line_id']:
+#       #login success
+#       return {'status':"Login success"},200
+#     else:
+#       return {'status':"Security code is invalid"},403
       
 
 # ADMIN GET RANDOM SECURITY CODE
 class AdminSecurity(Resource):
-  # @jwt_required
+  @jwt_required
   def post(self):
-    qry=Admin.query.filter_by(line_id=get_jwt_claims()['line_id']).first()
+    qry=Admin.query.filter_by(line_id=args['line_id']).first()
+
+    if qry is None:
+       return {"satus":"You Cannot Access This Page"}, 200
+
     size=6
     char=string.digits
     code=(''.join(random.choice(char) for _ in range(0,size)))
@@ -98,6 +102,7 @@ class AdminSecurity(Resource):
 
 # ADMIN MANUAL POST TRANSACTION
 class AdminPostTransaction(Resource):
+  @jwt_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("product_id", location="json")
@@ -127,6 +132,7 @@ class AdminPostTransaction(Resource):
 
 # ADMIN GET ALL TRANSACTIONS BY USERID
 class AdminGetTransactionId(Resource):
+  @jwt_required
   def get(self,id):
     qry=Transactions.query.filter_by(id=id).first()
 
@@ -137,6 +143,7 @@ class AdminGetTransactionId(Resource):
 
 # ADMIN GET ALL TRANSACTION HISTORY
 class AdminGetTransactionList(Resource):
+  @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -156,6 +163,7 @@ class AdminGetTransactionList(Resource):
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
+  @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
@@ -163,12 +171,17 @@ class AdminFilterTransaction(Resource):
     parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
     parser.add_argument('operator', location='args', required=True)
     parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price", "created_at"), default="label")
-    # parser.add_argument("time", location="args" )
+    # parser.add_argument("year", location="args" )
+    # parser.add_argument("month", location="args" )
+    # parser.add_argument("date", location="args" )
     args = parser.parse_args()
     
-
+    
     qry = Transactions.query.filter_by(operator=args['operator'])
     #
+    # print("SABAR", qry)
+    # qry_coba=qry.created_at.strftime("%d")
+    # print("COBA TERUS", qry_coba)
     # sort and order
     if args["order_by"] == "id":
         if args["sort"] == "desc":
@@ -185,11 +198,8 @@ class AdminFilterTransaction(Resource):
             qry = qry.order_by(Transactions.price.desc())
         else:
             qry = qry.order_by(Transactions.price)
-    elif args["order_by"]=="created_at":
-      if args["sort"]=="desc":
-        qry=qry.order_by(Transactions.created_at.desc())
-      else:
-        qry=qry.order_by(Transactions.created_at)
+
+
 
     # pagination
     offset = (int(args["page"]) - 1)*int(args["limit"])
@@ -207,6 +217,7 @@ class AdminFilterTransaction(Resource):
 
 # ADMIN GET ALL PRODUCT LIST
 class AdminProductList(Resource):
+  @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -225,6 +236,7 @@ class AdminProductList(Resource):
 
 # ADMIN GET ALL PRODUCT LIST AND FILTER BY OPERATOR, PRICE, AND TIMESTAMP
 class AdminFilterProduct(Resource):
+  @jwt_required
   def get(self):
       parser = reqparse.RequestParser()
       parser.add_argument('page', location='args', default=1)
@@ -268,7 +280,7 @@ class AdminFilterProduct(Resource):
       return result, 200, {'Content-Type': 'application/json'}
 
 api.add_resource(SuperAdmin, '/super')
-api.add_resource(AdminLogin, '/login')
+# api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
 api.add_resource(AdminPostTransaction, '/transaction')
 api.add_resource(AdminGetTransactionId, '/transaction/<int:id>')

@@ -5,11 +5,12 @@ import re
 # from requests.auth import HTTPBasicAuth
 import base64
 import midtransclient
+import os
 
 def midtrans_payment(order_id, label, phone_number, display_name, price ):
-    username = "SB-Mid-server-45Q3wZH3LKaU6h0BvqRV-Xhu"
-    client_key="SB-Mid-client-tnH7ODrMQGMO0zvn"
-    HOST="https://app.sandbox.midtrans.com/snap/v1/transactions"
+    username = os.getenv('SERVER_KEY', None)
+    client_key = os.getenv('CLIENT_KEY', None)
+    HOST = os.getenv('HOST', None)
 
     snap = midtransclient.Snap(
         is_production=False,

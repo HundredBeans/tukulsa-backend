@@ -11,9 +11,6 @@ from ..users.models import Users
 bp_mobPulsa = Blueprint('mobPulsa', __name__)
 api = Api(bp_mobPulsa)
 
-username = "085659229599"
-password = "9415e33f6d2098d7"
-
 class MobilePulsaCallback(Resource):
     '''
     Class for Handling Callback from Mobile Pulsa API

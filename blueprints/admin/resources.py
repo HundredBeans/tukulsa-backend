@@ -87,10 +87,14 @@ class SuperAdmin(Resource):
 class AdminSecurity(Resource):
   @jwt_required
   def post(self):
+    parser=reqparse.RequestParser()
+    parser.add_argument("line_id", location="args")
+    args=parser.parse_args()
+
     qry=Admin.query.filter_by(line_id=args['line_id']).first()
 
     if qry is None:
-       return {"satus":"You Cannot Access This Page"}, 200
+       return {"status":"You Cannot Access This Page"}, 200
 
     size=6
     char=string.digits
@@ -178,11 +182,13 @@ class AdminFilterTransaction(Resource):
     
     
     qry = Transactions.query.filter_by(operator=args['operator'])
-    #
+    # qry_coba=qry.filter(func.extract("year", "2018-12-02"))
+
+    # print("BAM", qry_coba)
     # print("SABAR", qry)
     # qry_coba=qry.created_at.strftime("%d")
     # print("COBA TERUS", qry_coba)
-    # sort and order
+    # sort and orde
     if args["order_by"] == "id":
         if args["sort"] == "desc":
             qry = qry.order_by(Transactions.id.desc())

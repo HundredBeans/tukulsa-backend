@@ -2,7 +2,7 @@
 
 eval "$(ssh-agent -s)" &&
 ssh-add -k ~/.ssh/id_rsa &&
-cd ~/travis/tukulsa-backend
+cd ~/travis2/tukulsa-backend
 git pull
 mkdir storage && cd storage && mkdir log
 

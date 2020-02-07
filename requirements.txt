@@ -1,5 +1,4 @@
 flask
-werkzeug
 flask-jwt-extended
 flask-migrate
 flask-restful

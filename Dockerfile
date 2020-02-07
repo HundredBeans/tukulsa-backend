@@ -3,5 +3,5 @@ RUN mkdir -p /tukulsa-backend
 COPY . /tukulsa-backend
 RUN pip install -r /tukulsa-backend/requirements.txt
 WORKDIR /tukulsa-backend
-ENTRYPOINT [ "python" ]
-CMD [ "app.py" ]
+ENTRYPOINT [ "sh" ]
+CMD [ "start.sh" ]

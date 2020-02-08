@@ -31,8 +31,6 @@ class Chat(db.Model):
         'users.id', ondelete='CASCADE'), nullable=False)
     status_number = db.Column(db.Boolean, default=False)
     status_nominal = db.Column(db.Boolean, default=False)
-    # status_report = db.Column(db.Boolean, default=False)
-    # email_report = db.Column(db.String(255), default="kosong")
     phone_number = db.Column(db.String(14), default=None)
     nominal = db.Column(db.Integer, default=None)
     operator = db.Column(db.String(15), default=None)
@@ -42,8 +40,6 @@ class Chat(db.Model):
         'chat_userid': fields.Integer,
         'status_number': fields.Boolean,
         'status_nominal': fields.Boolean,
-        # 'status_report': fileds.Boolean,
-        # 'email_report': fields.String,
         'phone_number': fields.String,
         'nominal': fields.Integer,
         'operator': fields.String

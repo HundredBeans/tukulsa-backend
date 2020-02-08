@@ -2,6 +2,13 @@
 # Created by https://www.gitignore.io/api/flask,python
 # Edit at https://www.gitignore.io/?templates=flask,python
 
+# migrations
+migrations/
+
+# deploy
+deploy_rsa
+deploy_rsa.pub
+
 ### Flask ###
 instance/*
 !instance/.gitignore
@@ -10,6 +17,7 @@ instance/*
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
+__pycache__
 *.py[cod]
 *$py.class
 
@@ -161,3 +169,5 @@ dmypy.json
 
 # End of https://www.gitignore.io/api/flask,python
 
+# Log
+*.log.*

@@ -292,7 +292,27 @@ class UserFilterTransactions(Resource):
     def options(self):
         return 200
 
+class UserOrderIdTransaction(Resource):
+    """
+    Receive transaction detail specified by order id
 
+    Method
+    --
+        POST(self)
+        
+    """
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('order_id', location='json', required=True)
+        args = parser.parse_args()
+
+        selected_trx = Transactions.query.filter_by(order_id=args['order_id']).first()
+        marshal_trx = marshal(selected_trx, Transactions.response_fields)
+
+        return marshal_trx, 200
+
+    def options(self):
+        return 200
 class EditStatusTransaction(Resource):
     """
     Edit status transactions after receive callback from midtrans payment or mobilepulsa response
@@ -437,6 +457,7 @@ api.add_resource(UserTopUp, '/transaction')
 api.add_resource(UserStatus, '/<int:id>/status')
 api.add_resource(UserTransactionDetail, '/transactions/<int:id>')
 api.add_resource(UserNewestTransaction, '/transactions/newest')
+api.add_resource(UserOrderIdTransaction, '/transactions/orderid')
 api.add_resource(UserFilterTransactions, '/transactions/filterby')
 api.add_resource(EditStatusTransaction, '/transactions/edit')
 api.add_resource(ProductForUser, '/product/list')

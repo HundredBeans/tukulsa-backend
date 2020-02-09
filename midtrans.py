@@ -7,13 +7,19 @@ import base64
 import midtransclient
 import os
 
+STATE = os.getenv('IS_PRODUCTION', None)
+if STATE == 'True':
+    STATE = True
+elif STATE == 'False':
+    STATE = False
+
 def midtrans_payment(order_id, label, phone_number, display_name, price ):
     username = os.getenv('SERVER_KEY', None)
     client_key = os.getenv('CLIENT_KEY', None)
     HOST = os.getenv('HOST', None)
 
     snap = midtransclient.Snap(
-        is_production=False,
+        is_production=STATE,
         server_key=username,
         client_key=client_key)
 

@@ -2,7 +2,7 @@ import json
 import requests
 from flask import Blueprint
 from flask_restful import Api, Resource, marshal, reqparse
-from .models import Users, Chat
+from .models import Users, Chat, Report
 from ..transactions.models import *
 from blueprints import db, app
 from mobilepulsa import get_operator, buying_pulsa
@@ -102,7 +102,7 @@ class UserChat(Resource):
         marshal_chat = marshal(chat_field, Chat.response_fileds)
         return marshal_chat, 200, {'Content-Type': 'application/json'}
 
-    # PUT METHOD INPUT , STATUS, NOMINAL, NUMBER, EMAIL_REPORT
+    # PUT METHOD INPUT , STATUS, NOMINAL, NUMBER
     def put(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
@@ -112,7 +112,6 @@ class UserChat(Resource):
         parser.add_argument('status_number', location='json')
         parser.add_argument('operator', location='json')
         parser.add_argument('status_report', location='json')
-        parser.add_argument('email_report', location='json')
         args = parser.parse_args()
 
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
@@ -130,8 +129,6 @@ class UserChat(Resource):
             chat_field.status_report = bool(args['status_report'] == 'True')
         if args['operator']:
             chat_field.operator = args['operator']
-        if args['email_report']:
-            chat_field.email_report = args['email_report']
         db.session.commit()
 
         # log
@@ -456,6 +453,60 @@ class GenerateProductList(Resource):
     def options(self):
         return 200
 
+class UserReport(Resource):
+    """
+    Everything about User's Report
+
+    Methods
+    --
+        post(self) : Create report row, with order_id and line_id
+        put(self) : Edit or add Text and Email into User's report
+    """
+    # Create new report for user and change status_report in Chat to True
+    def post(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('order_id', location='json', required=True)
+        args = parser.parse_args()
+
+        user_qry = User.query.filter_by(line_id=args['line_id']).first()
+        user_id = user_qry.id
+        created_at = datetime.now(timezone('Asia/Jakarta'))
+
+        new_report = Report(user_id, args['order_id'], created_at)
+        db.session.add(new_report)
+        db.session.commit()
+
+        chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
+        chat_qry.status_report = True
+        db.session.commit()
+
+        return marshal(new_report, Report.response_fields), 200, {'Content-Type': 'application/json'}
+
+    def put(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('line_id', location='json', required=True)
+        parser.add_argument('text', location='json')
+        parser.add_argument('email', location='json')
+        args = parser.parse_args()
+
+        user_qry = User.query.filter_by(line_id=args['line_id']).first()
+        user_id = user_qry.id
+
+        report_qry = Report.query.filter_by(user_id=user_id).order_by(desc(Report.id)).first()
+        if args['text']:
+            report_qry.text = report_qry.text + " " + str(args['text'])
+        if args['email']:
+            report_qry.email = args['email']
+            chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
+            chat_qry.status_report = False
+        db.session.commit()
+
+        return marshal(report_qry, Report.response_fields), 200, {'Content-Type': 'application/json'}
+
+    def options(self):
+        return 200
+
 
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
@@ -471,3 +522,4 @@ api.add_resource(ProductFilter, '/product/filterby')
 api.add_resource(UserRootPath, '')
 api.add_resource(UserChat, '/chat')
 api.add_resource(GenerateProductList, '/product/generate')
+api.add_resource(UserReport, '/report')

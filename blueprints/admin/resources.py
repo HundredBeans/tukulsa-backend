@@ -5,6 +5,7 @@ from ..transactions.models import *
 from blueprints import db, internal_required
 from sqlalchemy import func, distinct
 from .models import Admin
+from ..users.models import Report
 import string
 import random
 import calendar
@@ -305,6 +306,40 @@ class AdminFilterProduct(Resource):
   def options(self):
         return 200
 
+class AdminReport(Resource):
+    """
+    Page for Admin to update and get report from users
+
+    Methods
+    --
+        get(self) : Get all report
+        put(self) : Update report status or Get specific report by report id
+    """
+    def get(self):
+        report_all = Report.query.all().order_by(desc(Report.id))
+        report_list = []
+        for report in report_all:
+            marshal_report = marshal(report, Report.response_fields)
+            report_list.append(marshal_report)
+        
+        return report_list, 200, {'Content-Type': 'application/json'}
+
+    def put(self):
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('report_id', location='json', required=True)
+        parser.add_argument('report_status', location='json')
+        args = parser.parse_args()
+
+        report_qry = Report.query.get(args['report_id'])
+
+        if args['report_status']:
+            report_qry.status = args['report_status']
+
+        return marshal(report_qry, Report.response_fields), 200, {'Content-Type': 'application/json'}
+
+    def options(self):
+        return 200
+
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
@@ -314,6 +349,6 @@ api.add_resource(AdminGetTransactionList, '/transaction/list')
 api.add_resource(AdminFilterTransaction, '/transaction/filterby')
 api.add_resource(AdminProductList, '/product/list')
 api.add_resource(AdminFilterProduct, '/product/filterby')
-
+api.add_resource(AdminReport, '/report')
 
 

@@ -102,7 +102,7 @@ class UserChat(Resource):
         marshal_chat = marshal(chat_field, Chat.response_fileds)
         return marshal_chat, 200, {'Content-Type': 'application/json'}
 
-    # PUT METHOD INPUT , STATUS, NOMINAL, NUMBER,
+    # PUT METHOD INPUT , STATUS, NOMINAL, NUMBER, EMAIL_REPORT
     def put(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('line_id', location='json', required=True)
@@ -111,6 +111,8 @@ class UserChat(Resource):
         parser.add_argument('status_nominal', location='json')
         parser.add_argument('status_number', location='json')
         parser.add_argument('operator', location='json')
+        parser.add_argument('status_report', location='json')
+        parser.add_argument('email_report', location='json')
         args = parser.parse_args()
 
         selected_user = Users.query.filter_by(line_id=args['line_id']).first()
@@ -124,8 +126,12 @@ class UserChat(Resource):
             chat_field.status_nominal = bool(args['status_nominal'] == 'True')
         if args['status_number']:
             chat_field.status_number = bool(args['status_number'] == 'True')
+        if args['status_report']:
+            chat_field.status_report = bool(args['status_report'] == 'True')
         if args['operator']:
             chat_field.operator = args['operator']
+        if args['email_report']:
+            chat_field.email_report = args['email_report']
         db.session.commit()
 
         # log

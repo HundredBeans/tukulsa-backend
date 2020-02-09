@@ -469,7 +469,7 @@ class UserReport(Resource):
         parser.add_argument('order_id', location='json', required=True)
         args = parser.parse_args()
 
-        user_qry = User.query.filter_by(line_id=args['line_id']).first()
+        user_qry = Users.query.filter_by(line_id=args['line_id']).first()
         user_id = user_qry.id
         created_at = datetime.now(timezone('Asia/Jakarta'))
 
@@ -490,7 +490,7 @@ class UserReport(Resource):
         parser.add_argument('email', location='json')
         args = parser.parse_args()
 
-        user_qry = User.query.filter_by(line_id=args['line_id']).first()
+        user_qry = Users.query.filter_by(line_id=args['line_id']).first()
         user_id = user_qry.id
 
         report_qry = Report.query.filter_by(user_id=user_id).order_by(desc(Report.id)).first()

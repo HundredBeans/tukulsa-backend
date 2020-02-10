@@ -16,7 +16,7 @@ elif STATE == 'False':
 def midtrans_payment(order_id, label, phone_number, display_name, price ):
     username = os.getenv('SERVER_KEY', None)
     client_key = os.getenv('CLIENT_KEY', None)
-    HOST = os.getenv('HOST', None)
+    HOST = 'https://app.midtrans.com/snap/v1/transactions'
 
     snap = midtransclient.Snap(
         is_production=STATE,

@@ -18,7 +18,7 @@ api = Api(bp_midtrans)
 
 username = os.getenv('SERVER_KEY', None)
 client_key = os.getenv('CLIENT_KEY', None)
-HOST = os.getenv('HOST', None)
+HOST = 'https://app.midtrans.com/snap/v1/transactions'
 STATE = os.getenv('IS_PRODUCTION', None)
 if STATE == 'True':
     STATE = True

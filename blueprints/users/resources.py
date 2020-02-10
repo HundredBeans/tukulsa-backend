@@ -10,6 +10,8 @@ from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
 from pytz import timezone
+# Email Notification via Gmail API
+from notification import send_email, template_notification
 
 
 bp_users = Blueprint('users', __name__)
@@ -498,6 +500,9 @@ class UserReport(Resource):
             report_qry.text = report_qry.text + " " + str(args['text'])
         if args['email']:
             report_qry.email = args['email']
+            message = template_notification.format(report_qry.order_id, report_qry.order_id, report_qry.text, report_qry.created_at, report_qry.email)
+            subject = "Keluhan terkait Order {}".format(report_qry.order_id)
+            send_email("tukulsa.project@gmail.com", "tukulsa.project@gmail.com", subject, message)
             chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
             chat_qry.status_report = False
         db.session.commit()

@@ -188,19 +188,28 @@ class AdminFilterTransaction(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
     parser.add_argument('limit', location='args', default=10)
-    parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
-    parser.add_argument('operator', location='args', required=True)
+    parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="desc")
+    parser.add_argument('operator', location='args')
+    parser.add_argument('days_ago', location='args', type=int, default=30)
+    parser.add_argument('payment_status', location='args', help="invalid payment-status value", choices=("LUNAS", "TERTOLAK", "DITUNDA", "KADALUARSA"))
+    parser.add_argument('order_status', location='args', help="invalid order-status value", choices=("BELUM DIPROSES", "PROSES", "SUKSES", "GAGAL"))
     parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price", "created_at"), default="label")
-    parser.add_argument("year", location="args" )
-    parser.add_argument("month", location="args" )
-    parser.add_argument("date", location="args" )
     args = parser.parse_args()
     
     
-    qry = Transactions.query.filter_by(operator=args['operator'])
+    qry = Transactions.query
     # qry_coba=qry.filter(Transactions.created_at.like('%2018%'))
-  
-   
+    if args['days_ago']:
+      current_time = datetime.datetime.now(timezone('Asia/Jakarta'))
+      days_ago = current_time - datetime.timedelta(days=args['days_ago'])
+      qry = qry.filter(Transactions.created_at > days_ago).all()
+    if args['operator']:
+      qry = qry.filter_by(operator=args['operator'])
+    if args['payment_status']:
+      qry = qry.filter_by(payment_status=args['payment_status'])
+    if args['order_status']:
+      qry = qry.filter_by(order_status=args['order_status'])
+
     if args["order_by"] == "id":
         if args["sort"] == "desc":
             qry = qry.order_by(Transactions.id.desc())
@@ -316,7 +325,14 @@ class AdminReport(Resource):
         put(self) : Update report status or Get specific report by report id
     """
     def get(self):
-        report_all = Report.query.all().order_by(desc(Report.id))
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('report_status', location='args')
+        args = parser.parse_args()
+
+        qry = Report.query
+        if args['report_status']:
+          qry = qry.filter_by(status=args['report_status'])
+        report_all = qry.order_by(desc(Report.id)).all()
         report_list = []
         for report in report_all:
             marshal_report = marshal(report, Report.response_fields)

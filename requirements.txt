@@ -13,3 +13,6 @@ requests
 requests_oauthlib
 flask-cors
 midtransclient
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib

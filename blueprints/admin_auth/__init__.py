@@ -13,11 +13,8 @@ class AdminAuth(Resource):
         parser.add_argument("username", location="args")
         parser.add_argument("password", location="args")
         parser.add_argument("security_code", location="args")
-        parser.add_argument("line_id",location="args")
         args=parser.parse_args()
 
-        qry=Admin.query.filter_by(line_id= args["line_id"]).first()
-        
         #Super Admin Login
         try:
             if args['username']=="admin" and args["password"]=="woka":
@@ -28,10 +25,17 @@ class AdminAuth(Resource):
         
         #Another Admin
         try:
-            if qry.security_code == args["security_code"]:
-                admin_data=marshal(qry, Admin.get_jwt_claims)
-                token=create_access_token(identity=args["line_id"], user_claims=admin_data)
-                return {'status':token},200
+            if len(args["security_code"]) == 6:
+                qry=Admin.query.filter_by(security_code= args["security_code"]).first()
+                if qry is not None:
+                    admin_data=marshal(qry, Admin.get_jwt_claims)
+                    token=create_access_token(identity=args["line_id"], user_claims=admin_data)
+                    return {'status':token}, 200
+            else:
+                report_code = Report.query.filter_by(security_code=args['security_code'])
+                if report_code is not None:
+                    token = create_access_token()
+                    return {'status':token}, 200
         
         except:
             return {'status': "You Don't Have Authorization"}, 200

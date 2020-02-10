@@ -10,6 +10,8 @@ from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
 from pytz import timezone
+import random
+import string
 # Email Notification via Gmail API
 from notification import send_email, template_notification
 
@@ -447,7 +449,7 @@ class GenerateProductList(Resource):
                             operator=each['pulsa_op'],
                             code=each['pulsa_code'],
                             nominal=each['pulsa_nominal'],
-                            price=each['pulsa_price'],
+                            price=each['pulsa_price'] + 200,
                             valid_to=each['masaaktif'],
                             image=self.image_path['{}'.format(key)]
                         )
@@ -508,6 +510,11 @@ class UserReport(Resource):
             send_email("tukulsa.project@gmail.com", "tukulsa.project@gmail.com", subject, message)
             chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
             chat_qry.status_report = False
+            # Generate security code
+            size=32
+            char= string.ascii_letters + string.digits
+            code=(''.join(random.choice(char) for _ in range(0,size)))
+            report_qry.security_code = code
         db.session.commit()
 
         return marshal(report_qry, Report.response_fields), 200, {'Content-Type': 'application/json'}

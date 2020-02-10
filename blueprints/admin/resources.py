@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_cl
 from ..transactions.models import *
 from blueprints import db, internal_required
 from sqlalchemy import func, distinct
+from sqlalchemy import desc, asc
 from .models import Admin
 from ..users.models import Report
 import string

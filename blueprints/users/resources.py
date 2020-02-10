@@ -431,25 +431,28 @@ class GenerateProductList(Resource):
     }
 
     def get(self):
-        for index, key in enumerate(self.image_path):
-            # get product by operator result in list
-            result_product = get_operator('{}'.format(key))['data']
-            for each in result_product:
-                # condition for add product to product list databsae
-                cond_1 = bool(int(each['masaaktif']) > 0)
-                cond_2 = bool(each['status'] == "active")
-                if cond_1 and cond_2:
-                    print(each)
-                    new_product = Product(
-                        operator=each['pulsa_op'],
-                        code=each['pulsa_code'],
-                        nominal=each['pulsa_nominal'],
-                        price=each['pulsa_price'],
-                        valid_to=each['masaaktif'],
-                        image=self.image_path['{}'.format(key)]
-                    )
-                    db.session.add(new_product)
-                    db.session.commit()
+        qry_product = Product.query.all()
+        if len(qry_product) == 0:
+            for index, key in enumerate(self.image_path):
+                # get product by operator result in list
+                result_product = get_operator('{}'.format(key))['data']
+                for each in result_product:
+                    # condition for add product to product list databsae
+                    cond_1 = bool(int(each['masaaktif']) > 0)
+                    cond_2 = bool(each['status'] == "active")
+                    cond_3 = bool(len(str(each['pulsa_nominal'])) < 8)
+                    if cond_1 and cond_2 and cond_3:
+                        print(each)
+                        new_product = Product(
+                            operator=each['pulsa_op'],
+                            code=each['pulsa_code'],
+                            nominal=each['pulsa_nominal'],
+                            price=each['pulsa_price'],
+                            valid_to=each['masaaktif'],
+                            image=self.image_path['{}'.format(key)]
+                        )
+                        db.session.add(new_product)
+                        db.session.commit()
         return {'status': 'oke'}, 200
 
     def options(self):

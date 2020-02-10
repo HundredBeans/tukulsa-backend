@@ -17,7 +17,7 @@ api = Api(bp_admin)
 # ADMIN LOGIN USING SECURITY CODE
 
 class SuperAdmin(Resource):
-  @internal_required
+  # @internal_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("line_id", location="json")
@@ -31,7 +31,7 @@ class SuperAdmin(Resource):
     db.session.commit()
 
     return marshal(admin_add, Admin.response_fields), 200
-  @jwt_required
+  # @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument("id", location="json")
@@ -113,7 +113,7 @@ class AdminSecurity(Resource):
 
 # ADMIN MANUAL POST TRANSACTION
 class AdminPostTransaction(Resource):
-  @jwt_required
+  # @jwt_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("product_id", location="json")
@@ -146,7 +146,7 @@ class AdminPostTransaction(Resource):
 
 # ADMIN GET ALL TRANSACTIONS BY USERID
 class AdminGetTransactionId(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self,id):
     qry=Transactions.query.filter_by(id=id).first()
 
@@ -160,7 +160,7 @@ class AdminGetTransactionId(Resource):
 
 # ADMIN GET ALL TRANSACTION HISTORY
 class AdminGetTransactionList(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -183,7 +183,7 @@ class AdminGetTransactionList(Resource):
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
@@ -238,7 +238,7 @@ class AdminFilterTransaction(Resource):
 
 # ADMIN GET ALL PRODUCT LIST
 class AdminProductList(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -260,7 +260,7 @@ class AdminProductList(Resource):
 
 # ADMIN GET ALL PRODUCT LIST AND FILTER BY OPERATOR, PRICE, AND TIMESTAMP
 class AdminFilterProduct(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
       parser = reqparse.RequestParser()
       parser.add_argument('page', location='args', default=1)

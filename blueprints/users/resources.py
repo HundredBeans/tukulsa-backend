@@ -505,16 +505,16 @@ class UserReport(Resource):
             report_qry.text = report_qry.text + " " + str(args['text'])
         if args['email']:
             report_qry.email = args['email']
-            message = template_notification.format(report_qry.order_id, report_qry.order_id, report_qry.text, report_qry.created_at, report_qry.email)
-            subject = "Keluhan terkait Order {}".format(report_qry.order_id)
-            send_email("tukulsa.project@gmail.com", "tukulsa.project@gmail.com", subject, message)
-            chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
-            chat_qry.status_report = False
             # Generate security code
             size=32
             char= string.ascii_letters + string.digits
             code=(''.join(random.choice(char) for _ in range(0,size)))
             report_qry.security_code = code
+            message = template_notification.format(report_qry.order_id, report_qry.order_id, report_qry.text, report_qry.created_at, report_qry.email, code)
+            subject = "Keluhan terkait Order {}".format(report_qry.order_id)
+            send_email("tukulsa.project@gmail.com", "tukulsa.project@gmail.com", subject, message)
+            chat_qry = Chat.query.filter_by(chat_userid=user_id).first()
+            chat_qry.status_report = False
         db.session.commit()
 
         return marshal(report_qry, Report.response_fields), 200, {'Content-Type': 'application/json'}

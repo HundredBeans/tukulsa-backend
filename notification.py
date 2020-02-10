@@ -134,7 +134,7 @@ template_notification = '''<table style="background-color:#fff;margin:5% auto;wi
 				<tr>
 					<td>
 						<p style="font-family:Roboto,RobotoDraft,Helvetica,Arial,sans-serif;margin:0;font-size:16px;line-height:24px;color:rgba(0,0,0,0.70)">Laporan Masalah {}:<br>
-                            {}<br>Tanggal Kejadian : {}<br>Kamu bisa kontak korban di Email {}</p>
+                            {}<br>Tanggal Kejadian : {}<br>Kamu bisa kontak korban di Email {}<br>Klik <a href="https://admin.tukulsa.site/login/{}">di sini</a> untuk masuk ke halaman admin</p>
 					</td>
                 </tr>
                 <tr>

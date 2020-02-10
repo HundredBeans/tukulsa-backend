@@ -30,12 +30,12 @@ class AdminAuth(Resource):
                 if qry is not None:
                     admin_data=marshal(qry, Admin.get_jwt_claims)
                     token=create_access_token(identity='admin', user_claims=admin_data)
-                    return {'status':token}, 200
+                    return {'token':token}, 200
             else:
                 report_code = Report.query.filter_by(security_code=args['security_code'])
                 if report_code is not None:
                     token = create_access_token()
-                    return {'status':token}, 200
+                    return {'token':token}, 200
         except:
             return {'status': "You Don't Have Authorization"}, 200
 

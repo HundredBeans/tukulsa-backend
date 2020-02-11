@@ -34,10 +34,10 @@ class AdminAuth(Resource):
             else:
                 report_code = Report.query.filter_by(security_code=args['security_code'])
                 if report_code is not None:
-                    token = create_access_token()
+                    token = create_access_token(identity='admin')
                     return {'token':token}, 200
         except:
-            return {'status': "You Don't Have Authorization"}, 200
+            return {'status': "You Don't Have Authorization"}, 403
 
     def options(self):
         return 200

@@ -65,5 +65,24 @@ def get_order_status(orderID):
     }"""
     data = requests.post(url, data=json, headers=headers, timeout=30).text
     parsed = JSON.loads(data)
+    return parsed
+    # print(JSON.dumps(parsed, indent=4))
 
-    print(JSON.dumps(parsed, indent=4))
+
+def get_balance():
+    gabung=username+password+"bl"
+    signature=hashlib.md5(gabung.encode()).hexdigest()
+    headers={'content-type': 'application/json'}
+    
+    json="""{
+        \"commands\":\"balance\",
+        \"username\":\""""+ username + """\",
+        \"sign\":\""""+ signature + """\"
+    }"""
+
+    data=requests.post(url, data=json, headers=headers, timeout=30).text
+    parsed=JSON.loads(data)
+
+    return parsed
+
+

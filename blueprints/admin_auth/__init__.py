@@ -1,7 +1,7 @@
 from flask_restful import Api, Resource, reqparse, marshal
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_claims, jwt_required
 from flask import Blueprint
-from ..admin.models import Admin
+from ..admin.models import Admin, Report
 
 bp_auth=Blueprint("admin_auth", __name__)
 api=Api(bp_auth, catch_all_404s=True)

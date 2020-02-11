@@ -7,7 +7,7 @@ import os
 
 username = os.getenv('MOBILEPULSA_USERNAME', None)
 password = os.getenv('MOBILEPULSA_PASSWORD', None)
-base_url = os.getenv('BASE_URL', None)
+base_url = 'https://api.mobilepulsa.net/v1/legacy/index'
 
 
 def get_operator(operator):

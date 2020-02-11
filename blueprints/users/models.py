@@ -58,6 +58,7 @@ class Report(db.Model):
     order_id = db.Column(db.String(255), nullable=False, default=None)
     text = db.Column(db.String(1000), default="Report :")
     email = db.Column(db.String(255), default=None)
+    security_code = db.Column(db.String(32), default=None)
     created_at = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(255), default="BELUM DISELESAIKAN")
 
@@ -67,6 +68,7 @@ class Report(db.Model):
         'order_id': fields.String,
         'text': fields.String,
         'email': fields.String,
+        'security_code': fields.String,
         'created_at': fields.DateTime,
         'status': fields.String
     }

@@ -10,6 +10,8 @@ from midtrans import midtrans_payment
 from sqlalchemy import desc, asc
 from datetime import datetime
 from pytz import timezone
+import random
+import string
 # Email Notification via Gmail API
 from notification import send_email, template_notification
 
@@ -431,25 +433,28 @@ class GenerateProductList(Resource):
     }
 
     def get(self):
-        for index, key in enumerate(self.image_path):
-            # get product by operator result in list
-            result_product = get_operator('{}'.format(key))['data']
-            for each in result_product:
-                # condition for add product to product list databsae
-                cond_1 = bool(int(each['masaaktif']) > 0)
-                cond_2 = bool(each['status'] == "active")
-                if cond_1 and cond_2:
-                    print(each)
-                    new_product = Product(
-                        operator=each['pulsa_op'],
-                        code=each['pulsa_code'],
-                        nominal=each['pulsa_nominal'],
-                        price=each['pulsa_price'],
-                        valid_to=each['masaaktif'],
-                        image=self.image_path['{}'.format(key)]
-                    )
-                    db.session.add(new_product)
-                    db.session.commit()
+        qry_product = Product.query.all()
+        if len(qry_product) == 0:
+            for index, key in enumerate(self.image_path):
+                # get product by operator result in list
+                result_product = get_operator('{}'.format(key))['data']
+                for each in result_product:
+                    # condition for add product to product list databsae
+                    cond_1 = bool(int(each['masaaktif']) > 0)
+                    cond_2 = bool(each['status'] == "active")
+                    cond_3 = bool(len(str(each['pulsa_nominal'])) < 8)
+                    if cond_1 and cond_2 and cond_3:
+                        print(each)
+                        new_product = Product(
+                            operator=each['pulsa_op'],
+                            code=each['pulsa_code'],
+                            nominal=each['pulsa_nominal'],
+                            price=each['pulsa_price'] + 200,
+                            valid_to=each['masaaktif'],
+                            image=self.image_path['{}'.format(key)]
+                        )
+                        db.session.add(new_product)
+                        db.session.commit()
         return {'status': 'oke'}, 200
 
     def options(self):
@@ -500,7 +505,12 @@ class UserReport(Resource):
             report_qry.text = report_qry.text + " " + str(args['text'])
         if args['email']:
             report_qry.email = args['email']
-            message = template_notification.format(report_qry.order_id, report_qry.order_id, report_qry.text, report_qry.created_at, report_qry.email)
+            # Generate security code
+            size=32
+            char= string.ascii_letters + string.digits
+            code=(''.join(random.choice(char) for _ in range(0,size)))
+            report_qry.security_code = code
+            message = template_notification.format(report_qry.order_id, report_qry.order_id, report_qry.text, report_qry.created_at, report_qry.email, code)
             subject = "Keluhan terkait Order {}".format(report_qry.order_id)
             send_email("tukulsa.project@gmail.com", "tukulsa.project@gmail.com", subject, message)
             chat_qry = Chat.query.filter_by(chat_userid=user_id).first()

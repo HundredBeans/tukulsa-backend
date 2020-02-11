@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_cl
 from ..transactions.models import *
 from blueprints import db, internal_required
 from sqlalchemy import func, distinct
+from sqlalchemy import desc, asc
 from .models import Admin
 from ..users.models import Report
 import string
@@ -17,7 +18,7 @@ api = Api(bp_admin)
 # ADMIN LOGIN USING SECURITY CODE
 
 class SuperAdmin(Resource):
-  @internal_required
+  # @internal_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("line_id", location="json")
@@ -31,7 +32,7 @@ class SuperAdmin(Resource):
     db.session.commit()
 
     return marshal(admin_add, Admin.response_fields), 200
-  @jwt_required
+  # @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument("id", location="json")
@@ -113,7 +114,7 @@ class AdminSecurity(Resource):
 
 # ADMIN MANUAL POST TRANSACTION
 class AdminPostTransaction(Resource):
-  @jwt_required
+  # @jwt_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("product_id", location="json")
@@ -146,7 +147,7 @@ class AdminPostTransaction(Resource):
 
 # ADMIN GET ALL TRANSACTIONS BY USERID
 class AdminGetTransactionId(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self,id):
     qry=Transactions.query.filter_by(id=id).first()
 
@@ -160,7 +161,7 @@ class AdminGetTransactionId(Resource):
 
 # ADMIN GET ALL TRANSACTION HISTORY
 class AdminGetTransactionList(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -183,24 +184,33 @@ class AdminGetTransactionList(Resource):
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
     parser.add_argument('limit', location='args', default=10)
-    parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="asc")
-    parser.add_argument('operator', location='args', required=True)
+    parser.add_argument("sort", location="args", help="invalid sort value", choices=("desc", "asc"), default="desc")
+    parser.add_argument('operator', location='args')
+    parser.add_argument('days_ago', location='args', type=int, default=30)
+    parser.add_argument('payment_status', location='args', help="invalid payment-status value", choices=("LUNAS", "TERTOLAK", "DITUNDA", "KADALUARSA"))
+    parser.add_argument('order_status', location='args', help="invalid order-status value", choices=("BELUM DIPROSES", "PROSES", "SUKSES", "GAGAL"))
     parser.add_argument("order_by", location="args", help="invalid order-by value",choices=("id", "label", "price", "created_at"), default="label")
-    parser.add_argument("year", location="args" )
-    parser.add_argument("month", location="args" )
-    parser.add_argument("date", location="args" )
     args = parser.parse_args()
     
     
-    qry = Transactions.query.filter_by(operator=args['operator'])
+    qry = Transactions.query
     # qry_coba=qry.filter(Transactions.created_at.like('%2018%'))
-  
-   
+    if args['days_ago']:
+      current_time = datetime.datetime.now(timezone('Asia/Jakarta'))
+      days_ago = current_time - datetime.timedelta(days=args['days_ago'])
+      qry = qry.filter(Transactions.created_at > days_ago).all()
+    if args['operator']:
+      qry = qry.filter_by(operator=args['operator'])
+    if args['payment_status']:
+      qry = qry.filter_by(payment_status=args['payment_status'])
+    if args['order_status']:
+      qry = qry.filter_by(order_status=args['order_status'])
+
     if args["order_by"] == "id":
         if args["sort"] == "desc":
             qry = qry.order_by(Transactions.id.desc())
@@ -238,7 +248,7 @@ class AdminFilterTransaction(Resource):
 
 # ADMIN GET ALL PRODUCT LIST
 class AdminProductList(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -260,7 +270,7 @@ class AdminProductList(Resource):
 
 # ADMIN GET ALL PRODUCT LIST AND FILTER BY OPERATOR, PRICE, AND TIMESTAMP
 class AdminFilterProduct(Resource):
-  @jwt_required
+  # @jwt_required
   def get(self):
       parser = reqparse.RequestParser()
       parser.add_argument('page', location='args', default=1)
@@ -316,7 +326,14 @@ class AdminReport(Resource):
         put(self) : Update report status or Get specific report by report id
     """
     def get(self):
-        report_all = Report.query.all().order_by(desc(Report.id))
+        parser = parser = reqparse.RequestParser()
+        parser.add_argument('report_status', location='args')
+        args = parser.parse_args()
+
+        qry = Report.query
+        if args['report_status']:
+          qry = qry.filter_by(status=args['report_status'])
+        report_all = qry.order_by(desc(Report.id)).all()
         report_list = []
         for report in report_all:
             marshal_report = marshal(report, Report.response_fields)

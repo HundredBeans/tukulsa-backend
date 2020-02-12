@@ -175,7 +175,7 @@ class AdminGetTransactionList(Resource):
       parser.add_argument("order_by", location="json", help="invalid order-by value",
                             choices=("id"), default="id")
       args = parser.parse_args()
-
+      qry=Transactions.query
       # qry = Transactions.query.filter_by(
       #     Transactions.trx_users.line_id.contains(args['line_id'])).all()
       if args["line_id"]:

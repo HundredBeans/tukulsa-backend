@@ -241,15 +241,17 @@ class AdminFilterTransaction(Resource):
     result = []
     success_transaction=[]
     summary={}
+    total=0
     for transaction in selected_transactions:
         marshal_transaction = marshal(transaction, Transactions.response_fields)
         result.append(marshal_transaction)
     for success in qry_paid_transaction:
+      total=int(success.price)+total
       marshal_success=marshal(success, Transactions.response_fields)
       success_transaction.append(marshal_success)
     summary['transaction']=result
     summary["detail_success_transaction"]=success_transaction
-    summary["total_transaction"]=sum(qry_paid_transaction.price)
+    summary["total_transaction"]=total
     summary["total_transaction_number"]=len(qry_paid_transaction)
     summary["total_profit"]=200*len(qry_paid_transaction)
     print(result)
@@ -371,8 +373,9 @@ class AdminReport(Resource):
         return 200
 
 class GetBalance(Resource):
-    def get(self):      
-        return {'balance': get_balance}, 200
+    def get(self):
+        balance=get_balance()      
+        return {'balance': balance}, 200
 
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')

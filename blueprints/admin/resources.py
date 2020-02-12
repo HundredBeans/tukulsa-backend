@@ -7,7 +7,7 @@ from blueprints import db, internal_required
 from sqlalchemy import func, distinct
 from sqlalchemy import desc, asc
 from .models import Admin
-from ..users.models import Report
+from ..users.models import Report,Users
 import string
 import random
 import calendar

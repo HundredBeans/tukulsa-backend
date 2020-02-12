@@ -363,10 +363,10 @@ class AdminReport(Resource):
         args = parser.parse_args()
 
         report_qry = Report.query.get(args['report_id'])
-
+  
         if args['report_status']:
             report_qry.status = args['report_status']
-
+        db.session.commit()
         return marshal(report_qry, Report.response_fields), 200, {'Content-Type': 'application/json'}
 
     def options(self):

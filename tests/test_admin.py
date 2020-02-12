@@ -5,5 +5,4 @@ import unittest
 from . import app, reset_db,client
 
 
-class TestAdmin():
-    
+

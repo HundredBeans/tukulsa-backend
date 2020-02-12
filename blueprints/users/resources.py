@@ -586,6 +586,8 @@ class UserNewestDeposit(Resource):
         return 200
 
 
+
+
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
 api.add_resource(UserTopUp, '/transaction')

@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource, marshal, reqparse
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_claims, jwt_required
 from ..transactions.models import *
+from mobilepulsa import get_balance
 from blueprints import db, internal_required
 from sqlalchemy import func, distinct
 from sqlalchemy import desc, asc
@@ -235,12 +236,17 @@ class AdminFilterTransaction(Resource):
 
     selected_transactions = qry.all()
     # print(selected_products)
+    qry_paid_transaction=Transactions.query.filter_by(order_status="DIPROSES").all()
     result = []
+    summary={}
     for transaction in selected_transactions:
         marshal_transaction = marshal(transaction, Transactions.response_fields)
         result.append(marshal_transaction)
+    summary['transaction']=result
+    summary["total_transaction"]=sum(qry_paid_transaction.price)
+    summary["total_profit"]=200*len(qry_paid_transaction)
     print(result)
-    return result, 200, {'Content-Type': 'application/json'}
+    return summary, 200, {'Content-Type': 'application/json'}
 
   def options(self):
         return 200
@@ -357,6 +363,10 @@ class AdminReport(Resource):
     def options(self):
         return 200
 
+class GetBalance(Resource):
+    def get(self):      
+        return {'balance': get_balance}, 200
+
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
@@ -367,5 +377,6 @@ api.add_resource(AdminFilterTransaction, '/transaction/filterby')
 api.add_resource(AdminProductList, '/product/list')
 api.add_resource(AdminFilterProduct, '/product/filterby')
 api.add_resource(AdminReport, '/report')
+api.add_resource(GetBalance,"/balancepulsa")
 
 

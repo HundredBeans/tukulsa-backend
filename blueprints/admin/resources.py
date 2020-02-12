@@ -238,12 +238,18 @@ class AdminFilterTransaction(Resource):
     # print(selected_products)
     qry_paid_transaction=Transactions.query.filter_by(order_status="SUKSES").all()
     result = []
+    success_transaction=[]
     summary={}
     for transaction in selected_transactions:
         marshal_transaction = marshal(transaction, Transactions.response_fields)
         result.append(marshal_transaction)
+    for success in qry_paid_transaction:
+      marshal_success=marshal(success, Transactions.response_fields)
+      success_transaction.append(marshal_success)
     summary['transaction']=result
+    summary["detail_success_transaction"]=success_transaction
     summary["total_transaction"]=sum(qry_paid_transaction.price)
+    summary["total_transaction_number"]=len(qry_paid_transaction)
     summary["total_profit"]=200*len(qry_paid_transaction)
     print(result)
     return summary, 200, {'Content-Type': 'application/json'}

@@ -205,7 +205,7 @@ class AdminFilterTransaction(Resource):
     if args['days_ago']:
       current_time = datetime.now(timezone('Asia/Jakarta'))
       days_ago = current_time - timedelta(days=args['days_ago'])
-      qry = qry.filter(Transactions.created_at > days_ago).all()
+      qry = qry.filter(Transactions.created_at > days_ago)
     if args['operator']:
       qry = qry.filter_by(operator=args['operator'])
     if args['payment_status']:

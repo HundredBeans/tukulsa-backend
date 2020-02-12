@@ -165,6 +165,7 @@ class AdminGetTransactionId(Resource):
 class AdminGetTransactionList(Resource):
   # @jwt_required
   def get(self):
+      parser=reqparse.RequestParser()
       parser.add_argument('line_id', location='json', required=True)
       parser.add_argument('order_id', location='json')
       parser.add_argument('page', location='args', default=1)

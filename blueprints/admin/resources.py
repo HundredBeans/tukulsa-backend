@@ -178,10 +178,13 @@ class AdminGetTransactionList(Resource):
 
       # qry = Transactions.query.filter_by(
       #     Transactions.trx_users.line_id.contains(args['line_id'])).all()
-      selected_user = Users.query.filter_by(line_id=args['line_id']).first()
-      qry = Transactions.query.filter_by(user_id=selected_user.id)
+      if args["line_id"]:
+        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+        qry = Transactions.query.filter_by(user_id=selected_user.id)
+    
       # print(qry)
-      if args['order_id']: qry = qry.filter_by(order_id=args['order_id'])
+      if args['order_id']: 
+        qry = qry.filter_by(order_id=args['order_id'])
       # sort and order
       if args["order_by"] == "id":
           if args["sort"] == "desc":

@@ -376,6 +376,9 @@ class GetBalance(Resource):
     def get(self):
         balance=get_balance()      
         return {'balance': balance}, 200
+    
+    def options(self):
+        return 200
 
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')

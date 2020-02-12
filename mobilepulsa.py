@@ -80,7 +80,7 @@ def get_balance():
         \"sign\":\""""+ signature + """\"
     }"""
 
-    data=requests.post(url, data=json, headers=headers, timeout=30).text
+    data=requests.post(base_url, data=json, headers=headers, timeout=30).text
     parsed=JSON.loads(data)
 
     return parsed

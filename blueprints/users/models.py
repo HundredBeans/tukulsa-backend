@@ -8,6 +8,7 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     line_id = db.Column(db.String(255), nullable=False, unique=True)
     display_name = db.Column(db.String(255), nullable=False)
+    balance=db.Column(db.Integer, nullable=True)
     user_transactions = db.relationship(
         'Transactions', backref='users', cascade="all, delete", lazy='dynamic')
     user_chat = db.relationship(
@@ -17,11 +18,13 @@ class Users(db.Model):
         'id': fields.Integer,
         'display_name': fields.String,
         'line_id': fields.String,
+        "balance":fields.Integer
     }
 
-    def __init__(self, line_id, display_name):
+    def __init__(self, line_id, display_name, balance):
         self.line_id = line_id
         self.display_name = display_name
+        self.balance=balance
 
 
 class Chat(db.Model):

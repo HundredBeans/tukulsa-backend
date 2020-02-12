@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource, marshal, reqparse
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_claims, jwt_required
 from ..transactions.models import *
+from mobilepulsa import get_balance
 from blueprints import db, internal_required
 from sqlalchemy import func, distinct
 from sqlalchemy import desc, asc
@@ -10,7 +11,8 @@ from ..users.models import Report
 import string
 import random
 import calendar
-import datetime
+from pytz import timezone
+from datetime import timedelta, datetime
 
 bp_admin = Blueprint('admin', __name__)
 api = Api(bp_admin)
@@ -201,8 +203,8 @@ class AdminFilterTransaction(Resource):
     qry = Transactions.query
     # qry_coba=qry.filter(Transactions.created_at.like('%2018%'))
     if args['days_ago']:
-      current_time = datetime.datetime.now(timezone('Asia/Jakarta'))
-      days_ago = current_time - datetime.timedelta(days=args['days_ago'])
+      current_time = datetime.now(timezone('Asia/Jakarta'))
+      days_ago = current_time - timedelta(days=args['days_ago'])
       qry = qry.filter(Transactions.created_at > days_ago).all()
     if args['operator']:
       qry = qry.filter_by(operator=args['operator'])
@@ -235,12 +237,23 @@ class AdminFilterTransaction(Resource):
 
     selected_transactions = qry.all()
     # print(selected_products)
+    qry_paid_transaction=Transactions.query.filter_by(order_status="SUKSES").all()
     result = []
+    success_transaction=[]
+    summary={}
     for transaction in selected_transactions:
         marshal_transaction = marshal(transaction, Transactions.response_fields)
         result.append(marshal_transaction)
+    for success in qry_paid_transaction:
+      marshal_success=marshal(success, Transactions.response_fields)
+      success_transaction.append(marshal_success)
+    summary['transaction']=result
+    summary["detail_success_transaction"]=success_transaction
+    summary["total_transaction"]=sum(qry_paid_transaction.price)
+    summary["total_transaction_number"]=len(qry_paid_transaction)
+    summary["total_profit"]=200*len(qry_paid_transaction)
     print(result)
-    return result, 200, {'Content-Type': 'application/json'}
+    return summary, 200, {'Content-Type': 'application/json'}
 
   def options(self):
         return 200
@@ -357,6 +370,10 @@ class AdminReport(Resource):
     def options(self):
         return 200
 
+class GetBalance(Resource):
+    def get(self):      
+        return {'balance': get_balance}, 200
+
 api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
@@ -367,5 +384,6 @@ api.add_resource(AdminFilterTransaction, '/transaction/filterby')
 api.add_resource(AdminProductList, '/product/list')
 api.add_resource(AdminFilterProduct, '/product/filterby')
 api.add_resource(AdminReport, '/report')
+api.add_resource(GetBalance,"/balancepulsa")
 
 

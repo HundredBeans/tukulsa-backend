@@ -12,7 +12,7 @@ import string
 import random
 import calendar
 from pytz import timezone
-import datetime
+from datetime import timedelta, datetime
 
 bp_admin = Blueprint('admin', __name__)
 api = Api(bp_admin)
@@ -203,8 +203,8 @@ class AdminFilterTransaction(Resource):
     qry = Transactions.query
     # qry_coba=qry.filter(Transactions.created_at.like('%2018%'))
     if args['days_ago']:
-      current_time = datetime.datetime.now(timezone('Asia/Jakarta'))
-      days_ago = current_time - datetime.timedelta(days=args['days_ago'])
+      current_time = datetime.now(timezone('Asia/Jakarta'))
+      days_ago = current_time - timedelta(days=args['days_ago'])
       qry = qry.filter(Transactions.created_at > days_ago).all()
     if args['operator']:
       qry = qry.filter_by(operator=args['operator'])

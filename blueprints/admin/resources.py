@@ -236,7 +236,7 @@ class AdminFilterTransaction(Resource):
 
     selected_transactions = qry.all()
     # print(selected_products)
-    qry_paid_transaction=Transactions.query.filter_by(order_status="DIPROSES").all()
+    qry_paid_transaction=Transactions.query.filter_by(order_status="SUKSES").all()
     result = []
     summary={}
     for transaction in selected_transactions:

@@ -17,13 +17,3 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 
-#face-recog
-
-cmake
-dlib
-face_recognition
-opencv-python
-imutils
-pyexiv2
-exif
-urllib2

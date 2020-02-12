@@ -165,20 +165,42 @@ class AdminGetTransactionId(Resource):
 class AdminGetTransactionList(Resource):
   # @jwt_required
   def get(self):
-    parser=reqparse.RequestParser()
-    parser.add_argument('p', location='args', type=int,default=1)  
-    parser.add_argument('rp', location='args', type=int, default=20)
-    args=parser.parse_args()
+      parser.add_argument('line_id', location='json', required=True)
+      parser.add_argument('order_id', location='json')
+      parser.add_argument('page', location='args', default=1)
+      parser.add_argument('limit', location='args', default=20)
+      parser.add_argument("sort", location="args", help="invalid sort value", choices=(
+            "desc", "asc"), default="desc")
+      parser.add_argument("order_by", location="json", help="invalid order-by value",
+                            choices=("id"), default="id")
+      args = parser.parse_args()
 
-    qry=Transactions.query
+      # qry = Transactions.query.filter_by(
+      #     Transactions.trx_users.line_id.contains(args['line_id'])).all()
+      selected_user = Users.query.filter_by(line_id=args['line_id']).first()
+      qry = Transactions.query.filter_by(user_id=selected_user.id)
+      # print(qry)
+      if args['order_id']: qry = qry.filter_by(order_id=args['order_id'])
+      # sort and order
+      if args["order_by"] == "id":
+          if args["sort"] == "desc":
+              qry = qry.order_by(
+                  desc(Transactions.id))
+          else:
+              qry = qry.order_by(Transactions.id)
 
-    offset=(args['p']*args['rp'])-args['rp']
+          # pagination
+      offset = (int(args["page"]) - 1)*int(args["limit"])
+      qry = qry.limit(int(args['limit'])).offset(offset)
 
-    #looping all quaery to provide list of products
-    rows=[]
-    for row in qry.limit(args['rp']).offset(offset).all():
-        rows.append(marshal(row, Transactions.response_fields))
-    return rows, 200
+      all_trx = qry.all()
+      result = []
+      for trx in all_trx:
+          marshal_trx = marshal(trx, Transactions.response_fields)
+          marshal_trx['created_at'] = trx.created_at.strftime("%a %d %b %Y %H:%M")
+          result.append(marshal_trx)
+      return result, 200
+    
 
   def options(self):
         return 200

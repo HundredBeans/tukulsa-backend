@@ -112,6 +112,23 @@ class TestUser():
         }
         res=client.put("users/report", json=data)
         assert res.status_code==200
+    
+    def test_post_deposit(self,client):
+        data={
+            "line_id":"Ub28f07794c710049e376239fe95e2d2d",
+            "nominal": 100.000
+        }
+
+        res=client.post("users/transaction/deposit", json=data)
+        assert res.status_code==200
+
+    def test_post_newest_deposit(self, client):
+        data={"line_id": "Ub28f07794c710049e376239fe95e2d2d"}
+
+        res=client.post("users/deposit/newest", json=data)
+        assert res.status_code==200
+
+    
 
 
 

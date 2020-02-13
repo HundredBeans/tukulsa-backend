@@ -179,9 +179,9 @@ class UserTopUp(Resource):
         selected_product = Product.query.filter_by(
             code=args['product_code']).first()
         print(selected_product.id)
-        get_balance=get_balance()
+        saldo=get_balance()
 
-        if int(selected_product.nominal) > int(get_balance["data"]["balance"]):
+        if int(selected_product.nominal) > int(saldo["data"]["balance"]):
             send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Yang Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
             return {'status':"GAGAL"}, 403
         # new transaction

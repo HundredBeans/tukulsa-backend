@@ -293,7 +293,7 @@ class AdminProductList(Resource):
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
-    parser.add_argument('rp', location='args', type=int, default=20)
+    parser.add_argument('rp', location='args', type=int, default=100)
     args=parser.parse_args()
 
     qry=Product.query
@@ -356,6 +356,30 @@ class AdminFilterProduct(Resource):
 
   def options(self):
         return 200
+
+class AdminEditProduct(Resource):
+  # @jwt_required
+  def put(self):
+    parser=reqparse.RequestParser()
+    parser.add_argument('product_id', location='json', required=True)
+    parser.add_argument('price', location='json', type=int)
+    args=parser.parse_args()
+
+    selected_product = Product.query.get(args['product_id'])
+    if args['price']:
+      selected_product.price = args['price']
+      db.session.commit()
+
+    all_product = Product.query.all()
+    result = []
+    for each in all_product:
+        marshal_product = marshal(each, Product.response_fileds)
+        result.append(marshal_product)
+
+    return result, 200, {'Content-Type': 'application/json'}
+  
+  def options(self):
+    return 200
 
 class AdminReport(Resource):
     """

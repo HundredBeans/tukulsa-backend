@@ -321,7 +321,7 @@ class AdminFilterProduct(Resource):
           "desc", "asc"), default="asc")
       parser.add_argument('operator', location='args', required=True)
       parser.add_argument("order_by", location="args", help="invalid order-by value",
-                          choices=("id", "code", "price"), default="id")
+                          choices=("id", "nominal", "price"), default="id")
       args = parser.parse_args()
       qry = Product.query.filter_by(operator=args['operator'])
 
@@ -331,11 +331,11 @@ class AdminFilterProduct(Resource):
               qry = qry.order_by(Product.id.desc())
           else:
               qry = qry.order_by(Product.id)
-      elif args["order_by"] == "code":
+      elif args["order_by"] == "nominal":
           if args["sort"] == "desc":
-              qry = qry.order_by(Product.code.desc())
+              qry = qry.order_by(Product.nominal.desc())
           else:
-              qry = qry.order_by(Product.code)
+              qry = qry.order_by(Product.nominal)
       elif args["order_by"] == "price":
           if args["sort"] == "desc":
               qry = qry.order_by(Product.price.desc())

@@ -21,7 +21,7 @@ class Users(db.Model):
         # "balance":fields.Integer
     }
 
-    def __init__(self, line_id, display_name, balance):
+    def __init__(self, line_id, display_name):
         self.line_id = line_id
         self.display_name = display_name
         # self.balance=balance

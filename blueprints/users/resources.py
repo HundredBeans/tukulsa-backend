@@ -183,7 +183,7 @@ class UserTopUp(Resource):
 
         if int(selected_product.nominal) > int(get_balance["data"]["balance"]):
             send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Yang Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
-            return "GAGAL", 403
+            return {'status':"GAGAL"}, 403
         # new transaction
         new_transaction = Transactions(
             user_id=selected_user.id,

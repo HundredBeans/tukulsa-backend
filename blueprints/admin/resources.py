@@ -359,6 +359,9 @@ class AdminFilterProduct(Resource):
         return 200
 
 class AdminEditProduct(Resource):
+  def options(self):
+    return 200
+
   @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
@@ -379,8 +382,7 @@ class AdminEditProduct(Resource):
 
     return result, 200, {'Content-Type': 'application/json'}
   
-  def options(self):
-    return 200
+  
 
 class AdminReport(Resource):
     """
@@ -436,6 +438,7 @@ api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
 api.add_resource(AdminPostTransaction, '/transaction')
+api.add_resource(AdminEditProduct, '/product/edit')
 api.add_resource(AdminGetTransactionId, '/transaction/<int:id>')
 api.add_resource(AdminGetTransactionList, '/transaction/list')
 api.add_resource(AdminFilterTransaction, '/transaction/filterby')

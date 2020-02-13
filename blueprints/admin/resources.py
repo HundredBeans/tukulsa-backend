@@ -304,7 +304,7 @@ class AdminProductList(Resource):
     #looping all quaery to provide list of products
     rows=[]
     for row in qry.limit(args['rp']).offset(offset).all():
-        rows.append(marshal(row, Product.response_fields))
+        rows.append(marshal(row, Product.response_fileds))
     return rows, 200
   
   def options(self):

@@ -363,12 +363,12 @@ class AdminEditProduct(Resource):
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument('product_id', location='json', required=True)
-    parser.add_argument('price', location='json', type=int)
+    parser.add_argument('price', location='json')
     args=parser.parse_args()
 
     selected_product = Product.query.get(args['product_id'])
     if args['price']:
-      selected_product.price = args['price']
+      selected_product.price = int(args['price'])
       db.session.commit()
 
     all_product = Product.query.all()

@@ -5,9 +5,8 @@ from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users, Chat, Report
 from ..transactions.models import *
 from blueprints import db, app
-from mobilepulsa import get_operator, buying_pulsa
+from mobilepulsa import get_operator, buying_pulsa,get_balance
 from midtrans import midtrans_payment
-from mobilepulsa import get_balance
 from notification import send_email
 from sqlalchemy import desc, asc
 from datetime import datetime

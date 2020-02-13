@@ -1,0 +1,43 @@
+sudo: required
+services:
+- docker
+os:
+- linux
+env:
+  global:
+  - DOCKER_IMAGE_NAME="containerd"
+  - DOCKER_HUB_ORG="daffa99"
+before_install:
+- openssl aes-256-cbc -K $encrypted_7cbe93117c56_key -iv $encrypted_7cbe93117c56_iv -in deploy_rsa.enc -out deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 deploy_rsa
+- ssh-add deploy_rsa
+- docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+script:
+- sudo chmod +x deploy.sh
+- sudo chmod 600 deploy_rsa
+after_script:
+- sed -i "s/os.environ.get('RDS_PASS')/'${RDS_PASS}'/g" blueprints/__init__.py
+- sed -i "s/os.environ.get('RDS_LINK')/'${RDS_LINK}'/g" blueprints/__init__.py
+- sed -i "s/os.getenv('BASE_URL', None)/'${BASE_URL}'/g" mobilepulsa.py
+- sed -i "s/os.getenv('MOBILEPULSA_USERNAME', None)/'${MOBILEPULSA_USERNAME}'/g" mobilepulsa.py
+- sed -i "s/os.getenv('MOBILEPULSA_PASSWORD', None)/'${MOBILEPULSA_PASSWORD}'/g" mobilepulsa.py
+- sed -i "s/os.getenv('IS_PRODUCTION', None)/'${IS_PRODUCTION}'/g" midtrans.py
+- sed -i "s/os.getenv('SERVER_KEY', None)/'${SERVER_KEY}'/g" midtrans.py
+- sed -i "s/os.getenv('CLIENT_KEY', None)/'${CLIENT_KEY}'/g" midtrans.py
+- sed -i "s/os.getenv('HOST', None)/'${HOST}'/g" midtrans.py
+- sed -i "s/os.getenv('SERVER_KEY', None)/'${SERVER_KEY}'/g" blueprints/midtrans/resources.py
+- sed -i "s/os.getenv('CLIENT_KEY', None)/'${CLIENT_KEY}'/g" blueprints/midtrans/resources.py
+- sed -i "s/os.getenv('HOST', None)/'${HOST}'/g" blueprints/midtrans/resources.py
+- sed -i "s/os.getenv('IS_PRODUCTION', None)/'${IS_PRODUCTION}'/g" blueprints/midtrans/resources.py 
+- docker build -t ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:tukulsaBE-${TRAVIS_BUILD_ID} .
+- docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:tukulsaBE-${TRAVIS_BUILD_ID}
+- docker tag ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:tukulsaBE-${TRAVIS_BUILD_ID} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:BE2
+- docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:BE2
+- ssh-keyscan -H $SSH_IP >> ~/.ssh/known_hosts
+- ssh -v -i deploy_rsa $SSH_USER@$SSH_IP DIR=$ROOT_DIR  'bash -s' < deploy.sh
+deploy:
+- true: 
+  branches:
+    only:
+    - staging-deploy

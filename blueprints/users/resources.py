@@ -215,6 +215,7 @@ class UserTopUp(Resource):
         )
 
         marshal_trx['link_payment'] = link_payment
+        marshal_trx['status']='SUKSES'
 
         # print(marshal_trx)
         return marshal_trx, 200, {'Content-Type': 'application/json'}

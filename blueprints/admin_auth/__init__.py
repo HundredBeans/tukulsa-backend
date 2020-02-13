@@ -4,6 +4,7 @@ from flask import Blueprint
 from ..admin.models import Admin
 from ..users.models import Report
 from datetime import datetime,timedelta
+from pytz import timezone
 
 bp_auth=Blueprint("admin_auth", __name__)
 api=Api(bp_auth, catch_all_404s=True)
@@ -30,7 +31,7 @@ class AdminAuth(Resource):
             if len(args["security_code"]) == 6:
                 qry=Admin.query.filter_by(security_code= args["security_code"]).first()
                 if qry is not None:
-                    if qry.created_at.strftime('%H:%M:%S')+ timedelta(minutes=3)!=datetime.now().strftime("%H:%M:%S"):
+                    if qry.created_at + timedelta(minutes=3) < datetime.now(timezone('Asia/Jakarta')):
                         admin_data=marshal(qry, Admin.get_jwt_claims)
                         token=create_access_token(identity='admin', user_claims=admin_data)
                         return {'token':token}, 200

@@ -182,9 +182,9 @@ class UserTopUp(Resource):
         print(selected_product.id)
         get_balance=get_balance()
 
-        if int(selected_product.nominal) < int(get_balance.balance):
-            send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Ynag Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
-            return {'status':'You cannot purchase now, please try again later'}, 403
+        if int(selected_product.nominal) > int(get_balance["data"]["balance"]):
+            send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Yang Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
+            return "GAGAL", 403
         # new transaction
         new_transaction = Transactions(
             user_id=selected_user.id,

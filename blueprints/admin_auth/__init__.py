@@ -3,6 +3,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt_cl
 from flask import Blueprint
 from ..admin.models import Admin
 from ..users.models import Report
+from datetime import datetime,timedelta
 
 bp_auth=Blueprint("admin_auth", __name__)
 api=Api(bp_auth, catch_all_404s=True)
@@ -29,9 +30,12 @@ class AdminAuth(Resource):
             if len(args["security_code"]) == 6:
                 qry=Admin.query.filter_by(security_code= args["security_code"]).first()
                 if qry is not None:
-                    admin_data=marshal(qry, Admin.get_jwt_claims)
-                    token=create_access_token(identity='admin', user_claims=admin_data)
-                    return {'token':token}, 200
+                    if qry.created_at.strftime('%H:%M:%S')+ timedelta(minutes=3)!=datetime.now().strftime("%H:%M:%S"):
+                        admin_data=marshal(qry, Admin.get_jwt_claims)
+                        token=create_access_token(identity='admin', user_claims=admin_data)
+                        return {'token':token}, 200
+                    else:
+                        return {'status':"Your security code has been expired, please get the new one!"}
             else:
                 report_code = Report.query.filter_by(security_code=args['security_code'])
                 if report_code is not None:

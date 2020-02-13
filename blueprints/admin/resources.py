@@ -108,6 +108,7 @@ class AdminSecurity(Resource):
     code=(''.join(random.choice(char) for _ in range(0,size)))
     
     qry.security_code=code
+    qry.created_at=datetime.now()
     db.session.commit()
     return {"code":code}, 200
   

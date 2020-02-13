@@ -441,5 +441,6 @@ api.add_resource(AdminProductList, '/product/list')
 api.add_resource(AdminFilterProduct, '/product/filterby')
 api.add_resource(AdminReport, '/report')
 api.add_resource(GetBalance,"/balancepulsa")
+api.add_resource(AdminEditProduct,"/product/edit")
 
 

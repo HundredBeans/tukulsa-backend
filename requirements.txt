@@ -1,5 +1,5 @@
 flask
-werkzeug>=0.15.4
+werkzeug==0.15.4
 flask-jwt-extended
 flask-migrate
 flask-restful
@@ -13,3 +13,7 @@ requests
 requests_oauthlib
 flask-cors
 midtransclient
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+

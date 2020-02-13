@@ -11,14 +11,19 @@ from ..users.models import Users
 import base64
 from midtrans import midtrans_payment
 from mobilepulsa import buying_pulsa
+import os
 
 bp_midtrans = Blueprint('midtrans', __name__)
 api = Api(bp_midtrans)
 
-username = "SB-Mid-server-45Q3wZH3LKaU6h0BvqRV-Xhu"
-client_key = "SB-Mid-client-tnH7ODrMQGMO0zvn"
-# ganti jadi production LINK (https://app.midtrans.com/snap/v1/transactions)
-HOST = "https://app.sandbox.midtrans.com/snap/v1/transactions"
+username = os.getenv('SERVER_KEY', None)
+client_key = os.getenv('CLIENT_KEY', None)
+HOST = 'https://app.midtrans.com/snap/v1/transactions'
+STATE = os.getenv('IS_PRODUCTION', None)
+if STATE == 'True':
+    STATE = True
+elif STATE == 'False':
+    STATE = False
 
 
 class MidtransCallback(Resource):
@@ -28,7 +33,7 @@ class MidtransCallback(Resource):
     def post(self):
         # initialize api client object
         api_client = midtransclient.CoreApi(
-            is_production=False,
+            is_production=STATE,
             server_key=username,
             client_key=client_key
         )
@@ -67,26 +72,27 @@ class MidtransCallback(Resource):
         # Sample transaction_status handling logic
         if status_code == '200':
             # Ubah payment status di transaksi jadi PAID
-            selected_trx.payment_status = 'PAID'
+            selected_trx.payment_status = 'LUNAS'
+            selected_trx.order_status = 'PROSES'
             db.session.commit()
             # Nembak mobile pulsa
             buying_pulsa(order_id, selected_trx.phone_number, pulsa_code)
-            print('PAID')
+            print('LUNAS')
         elif status_code == '201':
             # Ubah payment status di transaksi jadi PENDING
-            selected_trx.payment_status = 'PENDING'
+            selected_trx.payment_status = 'TERTUNDA'
             db.session.commit()
-            print('PENDING')
+            print('TERTUNDA')
         elif status_code == '202':
             # Ubah payment status di transaksi jadi DENIED
-            selected_trx.payment_status = 'DENIED'
+            selected_trx.payment_status = 'DITOLAK'
             db.session.commit()
-            print('DENIED')
+            print('DITOLAK')
         elif status_code == '407':
             # Ubah payment status di transaksi jadi EXPIRED
-            selected_trx.payment_status = 'EXPIRED'
+            selected_trx.payment_status = 'KADALUWARSA'
             db.session.commit()
-            print('EXPIRED')
+            print('KADALUWARSA')
         else:
             print('ERROR')
             

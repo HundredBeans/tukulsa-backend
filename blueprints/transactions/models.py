@@ -47,9 +47,9 @@ class Transactions(db.Model):
     price = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
     # PENDING PAID EXPIRED FAILED NOTPAID
-    payment_status = db.Column(db.String(20), default="NOTPAID")
+    payment_status = db.Column(db.String(20), default="BELUM DIBAYAR")
     # PENDING SUCCESS FAILED PROCESSING
-    order_status = db.Column(db.String(20), default="PROCESSING")
+    order_status = db.Column(db.String(20), default="BELUM DIPROSES")
     trx_users = db.relationship(
         'Users', backref='transactions', cascade="all", lazy="joined")
     trx_product = db.relationship(

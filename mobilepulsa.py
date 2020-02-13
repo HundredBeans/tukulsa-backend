@@ -3,9 +3,11 @@
 import hashlib
 import json as JSON
 import requests
+import os
 
-username = "085659229599"
-password = "9415e33f6d2098d7"
+username = os.getenv('MOBILEPULSA_USERNAME', None)
+password = os.getenv('MOBILEPULSA_PASSWORD', None)
+base_url = 'https://api.mobilepulsa.net/v1/legacy/index'
 
 
 def get_operator(operator):
@@ -18,7 +20,7 @@ def get_operator(operator):
         \"sign\"     : \"""" + signature + """\"
     }"""
 
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index/pulsa/"+operator
+    url = "{}/pulsa/{}".format(base_url, operator)
 
     headers = {'content-type': 'application/json'}
 
@@ -31,7 +33,7 @@ def get_operator(operator):
 def buying_pulsa(orderID, numberPhone, pulsa_code):
     gabung = username+password+orderID
     signature = hashlib.md5(gabung.encode()).hexdigest()
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index"
+    url = base_url
     headers = {'content-type': 'application/json'}
 
     json = """{
@@ -52,7 +54,7 @@ def buying_pulsa(orderID, numberPhone, pulsa_code):
 def get_order_status(orderID):
     gabung = username+password+orderID
     signature = hashlib.md5(gabung.encode()).hexdigest()
-    url = "https://testprepaid.mobilepulsa.net/v1/legacy/index"
+    url = base_url
     headers = {'content-type': 'application/json'}
 
     json = """{
@@ -63,5 +65,24 @@ def get_order_status(orderID):
     }"""
     data = requests.post(url, data=json, headers=headers, timeout=30).text
     parsed = JSON.loads(data)
+    return parsed
+    # print(JSON.dumps(parsed, indent=4))
 
-    print(JSON.dumps(parsed, indent=4))
+
+def get_balance():
+    gabung=username+password+"bl"
+    signature=hashlib.md5(gabung.encode()).hexdigest()
+    headers={'content-type': 'application/json'}
+    
+    json="""{
+        \"commands\":\"balance\",
+        \"username\":\""""+ username + """\",
+        \"sign\":\""""+ signature + """\"
+    }"""
+
+    data=requests.post(base_url, data=json, headers=headers, timeout=30).text
+    parsed=JSON.loads(data)
+
+    return parsed
+
+

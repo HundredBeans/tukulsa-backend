@@ -7,6 +7,8 @@ from ..transactions.models import *
 from blueprints import db, app
 from mobilepulsa import get_operator, buying_pulsa
 from midtrans import midtrans_payment
+from mobilepulsa import get_balance
+from notification import send_email
 from sqlalchemy import desc, asc
 from datetime import datetime
 from pytz import timezone
@@ -178,6 +180,11 @@ class UserTopUp(Resource):
         selected_product = Product.query.filter_by(
             code=args['product_code']).first()
         print(selected_product.id)
+        get_balance=get_balance()
+
+        if int(selected_product.nominal) < int(get_balance.balance):
+            send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Ynag Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
+            return {'status':'You cannot purchase now, please try again later'}, 403
         # new transaction
         new_transaction = Transactions(
             user_id=selected_user.id,

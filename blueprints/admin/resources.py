@@ -71,24 +71,7 @@ class SuperAdmin(Resource):
     return {'status':"Data Successfully Updated"}, 200
   
   def options(self):
-        return 200
-
-# class AdminLogin(Resource):
-#   # @jwt_required
-#   def post(self):
-
-#     parser=reqparse.RequestParser()
-#     parser.add_argument("security_code", location="json")
-#     args=parser.parse_args()
-
-#     qry=Admin.query.filter_by(security_code=args['security_code']).first()
-
-#     if qry.line_id==get_jwt_claims()['line_id']:
-#       #login success
-#       return {'status':"Login success"},200
-#     else:
-#       return {'status':"Security code is invalid"},403
-      
+        return 200 
 
 # ADMIN GET RANDOM SECURITY CODE
 class AdminSecurity(Resource):

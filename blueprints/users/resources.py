@@ -5,8 +5,9 @@ from flask_restful import Api, Resource, marshal, reqparse
 from .models import Users, Chat, Report
 from ..transactions.models import *
 from blueprints import db, app
-from mobilepulsa import get_operator, buying_pulsa
+from mobilepulsa import get_operator, buying_pulsa,get_balance
 from midtrans import midtrans_payment
+from notification import send_email
 from sqlalchemy import desc, asc
 from datetime import datetime
 from pytz import timezone
@@ -178,6 +179,11 @@ class UserTopUp(Resource):
         selected_product = Product.query.filter_by(
             code=args['product_code']).first()
         print(selected_product.id)
+        saldo=get_balance()
+
+        if int(selected_product.nominal) > int(saldo["data"]["balance"]):
+            send_email("tukulsa.project@gmail.com","tukulsa.project@gmail.com","Saldo Mobile Pulsa Harus Diisi", "Ada Transaksi Yang Melebihi Saldo Mobile Pulsa Bos, Segera Isi ulang saldo" )
+            return {'status':"GAGAL"}, 403
         # new transaction
         new_transaction = Transactions(
             user_id=selected_user.id,
@@ -209,6 +215,7 @@ class UserTopUp(Resource):
         )
 
         marshal_trx['link_payment'] = link_payment
+        marshal_trx['status']='SUKSES'
 
         # print(marshal_trx)
         return marshal_trx, 200, {'Content-Type': 'application/json'}
@@ -522,72 +529,6 @@ class UserReport(Resource):
     def options(self):
         return 200
 
-class UserAddDeposit(Resource):
-    # USER GET PAYMENT URL
-    def post(self):
-        parser = parser = reqparse.RequestParser()
-        parser.add_argument('line_id', location='json', required=False)
-        parser.add_argument('nominal', location='json')
-        # parser.add_argument('payment_status', location='json',default="BELUM BAYAR")
-        args = parser.parse_args()
-        # butuh selected user
-        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
-      
-        # new deposit
-        new_deposit = Deposit(
-            user_id=selected_user.id,
-            line_id=args['line_id'],
-            nominal=args['nominal'],
-
-            
-        )
-        db.session.add(new_deposit)
-        db.session.commit()
-
-        new_deposit.order_id = 'TUKULSADEPOSIT4-{}'.format(
-            str(new_deposit.id))
-        db.session.commit()
-
-        marshal_trx = marshal(new_deposit, Deposit.response_fields)
-
-        link_deposit = midtrans_deposit(
-            order_id=new_deposit.order_id,
-            display_name=selected_user.display_name,
-            price=args['nominal']
-        )
-        
-
-        marshal_trx['link_deposit'] = link_deposit
-
-        # print(marshal_trx)
-        return marshal_trx, 200, {'Content-Type': 'application/json'}
-    
-    def options(self):
-        return 200
-    
-class UserNewestDeposit(Resource):
-    # USER GET INFO ABOUT LATEST TRANSACTION
-    def post(self):
-        parser = parser = reqparse.RequestParser()
-        parser.add_argument('line_id', location='json', required=True)
-        args = parser.parse_args()
-
-        selected_user = Users.query.filter_by(line_id=args['line_id']).first()
-
-        selected_trx = Deposit.query.filter_by(
-            user_id=selected_user.id).order_by(desc(Deposit.id)).first()
-        # selected_trx.created_at = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
-        marshal_trx = marshal(selected_trx, Deposit.response_fields)
-        # marshal_trx['created_at'] = selected_trx.created_at.strftime("%a %d %b %Y %H:%M")
-
-        return marshal_trx, 200
-
-    def options(self):
-        return 200
-
-
-
-
 api.add_resource(UserById, '/<int:id>')
 api.add_resource(UserProfile, '/<int:id>/profile')
 api.add_resource(UserTopUp, '/transaction')
@@ -603,5 +544,3 @@ api.add_resource(UserRootPath, '')
 api.add_resource(UserChat, '/chat')
 api.add_resource(GenerateProductList, '/product/generate')
 api.add_resource(UserReport, '/report')
-api.add_resource(UserAddDeposit, '/transaction/deposit')
-api.add_resource(UserNewestDeposit, '/deposit/newest')

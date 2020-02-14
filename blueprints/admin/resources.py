@@ -20,7 +20,7 @@ api = Api(bp_admin)
 # ADMIN LOGIN USING SECURITY CODE
 
 class SuperAdmin(Resource):
-  # @internal_required
+  @internal_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("line_id", location="json")
@@ -34,7 +34,7 @@ class SuperAdmin(Resource):
     db.session.commit()
 
     return marshal(admin_add, Admin.response_fields), 200
-  # @jwt_required
+  @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument("id", location="json")
@@ -71,24 +71,7 @@ class SuperAdmin(Resource):
     return {'status':"Data Successfully Updated"}, 200
   
   def options(self):
-        return 200
-
-# class AdminLogin(Resource):
-#   # @jwt_required
-#   def post(self):
-
-#     parser=reqparse.RequestParser()
-#     parser.add_argument("security_code", location="json")
-#     args=parser.parse_args()
-
-#     qry=Admin.query.filter_by(security_code=args['security_code']).first()
-
-#     if qry.line_id==get_jwt_claims()['line_id']:
-#       #login success
-#       return {'status':"Login success"},200
-#     else:
-#       return {'status':"Security code is invalid"},403
-      
+        return 200 
 
 # ADMIN GET RANDOM SECURITY CODE
 class AdminSecurity(Resource):
@@ -108,6 +91,7 @@ class AdminSecurity(Resource):
     code=(''.join(random.choice(char) for _ in range(0,size)))
     
     qry.security_code=code
+    qry.created_at=datetime.now(timezone('Asia/Jakarta'))
     db.session.commit()
     return {"code":code}, 200
   
@@ -116,7 +100,7 @@ class AdminSecurity(Resource):
 
 # ADMIN MANUAL POST TRANSACTION
 class AdminPostTransaction(Resource):
-  # @jwt_required
+  @jwt_required
   def post(self):
     parser=reqparse.RequestParser()
     parser.add_argument("product_id", location="json")
@@ -149,7 +133,7 @@ class AdminPostTransaction(Resource):
 
 # ADMIN GET ALL TRANSACTIONS BY USERID
 class AdminGetTransactionId(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self,id):
     qry=Transactions.query.filter_by(id=id).first()
 
@@ -163,7 +147,7 @@ class AdminGetTransactionId(Resource):
 
 # ADMIN GET ALL TRANSACTION HISTORY
 class AdminGetTransactionList(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self):
       parser=reqparse.RequestParser()
       parser.add_argument('line_id', location='json')
@@ -212,7 +196,7 @@ class AdminGetTransactionList(Resource):
 
 # ADMIN FILTER TRANSACTION BY OPERATOR, PRICE, OR, TIMESTAMP
 class AdminFilterTransaction(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self):
     parser = reqparse.RequestParser()
     parser.add_argument('page', location='args', default=1)
@@ -289,7 +273,7 @@ class AdminFilterTransaction(Resource):
 
 # ADMIN GET ALL PRODUCT LIST
 class AdminProductList(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self):
     parser=reqparse.RequestParser()
     parser.add_argument('p', location='args', type=int,default=1)  
@@ -303,7 +287,7 @@ class AdminProductList(Resource):
     #looping all quaery to provide list of products
     rows=[]
     for row in qry.limit(args['rp']).offset(offset).all():
-        rows.append(marshal(row, Product.response_fields))
+        rows.append(marshal(row, Product.response_fileds))
     return rows, 200
   
   def options(self):
@@ -311,7 +295,7 @@ class AdminProductList(Resource):
 
 # ADMIN GET ALL PRODUCT LIST AND FILTER BY OPERATOR, PRICE, AND TIMESTAMP
 class AdminFilterProduct(Resource):
-  # @jwt_required
+  @jwt_required
   def get(self):
       parser = reqparse.RequestParser()
       parser.add_argument('page', location='args', default=1)
@@ -320,7 +304,7 @@ class AdminFilterProduct(Resource):
           "desc", "asc"), default="asc")
       parser.add_argument('operator', location='args', required=True)
       parser.add_argument("order_by", location="args", help="invalid order-by value",
-                          choices=("id", "code", "price"), default="id")
+                          choices=("id", "nominal", "price"), default="id")
       args = parser.parse_args()
       qry = Product.query.filter_by(operator=args['operator'])
 
@@ -330,11 +314,11 @@ class AdminFilterProduct(Resource):
               qry = qry.order_by(Product.id.desc())
           else:
               qry = qry.order_by(Product.id)
-      elif args["order_by"] == "code":
+      elif args["order_by"] == "nominal":
           if args["sort"] == "desc":
-              qry = qry.order_by(Product.code.desc())
+              qry = qry.order_by(Product.nominal.desc())
           else:
-              qry = qry.order_by(Product.code)
+              qry = qry.order_by(Product.nominal)
       elif args["order_by"] == "price":
           if args["sort"] == "desc":
               qry = qry.order_by(Product.price.desc())
@@ -358,16 +342,19 @@ class AdminFilterProduct(Resource):
         return 200
 
 class AdminEditProduct(Resource):
-  # @jwt_required
+  def options(self):
+    return 200
+
+  @jwt_required
   def put(self):
     parser=reqparse.RequestParser()
     parser.add_argument('product_id', location='json', required=True)
-    parser.add_argument('price', location='json', type=int)
+    parser.add_argument('price', location='json')
     args=parser.parse_args()
 
     selected_product = Product.query.get(args['product_id'])
     if args['price']:
-      selected_product.price = args['price']
+      selected_product.price = int(args['price'])
       db.session.commit()
 
     all_product = Product.query.all()
@@ -378,8 +365,7 @@ class AdminEditProduct(Resource):
 
     return result, 200, {'Content-Type': 'application/json'}
   
-  def options(self):
-    return 200
+  
 
 class AdminReport(Resource):
     """
@@ -423,6 +409,7 @@ class AdminReport(Resource):
         return 200
 
 class GetBalance(Resource):
+    @jwt_required
     def get(self):
         balance=get_balance()      
         return {'balance': balance}, 200
@@ -434,6 +421,7 @@ api.add_resource(SuperAdmin, '/super')
 # api.add_resource(AdminLogin, '/login')
 api.add_resource(AdminSecurity, '/securitycode')
 api.add_resource(AdminPostTransaction, '/transaction')
+api.add_resource(AdminEditProduct, '/product/edit')
 api.add_resource(AdminGetTransactionId, '/transaction/<int:id>')
 api.add_resource(AdminGetTransactionList, '/transaction/list')
 api.add_resource(AdminFilterTransaction, '/transaction/filterby')

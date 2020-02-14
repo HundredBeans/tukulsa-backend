@@ -33,8 +33,8 @@ class AdminAuth(Resource):
                         return {'token':token}, 200
                     else:
                         return {'status':"Your security code has been expired, please get the new one!"}, 401
-            else:
-                report_code = Report.query.filter_by(security_code=args['security_code'])
+            elif len(args["security_code"]) == 32:
+                report_code = Report.query.filter_by(security_code=args['security_code']).first()
                 if report_code is not None:
                     token = create_access_token(identity='admin')
                     return {'token':token}, 200

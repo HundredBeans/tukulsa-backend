@@ -376,6 +376,7 @@ class AdminReport(Resource):
         get(self) : Get all report
         put(self) : Update report status or Get specific report by report id
     """
+    @jwt_required
     def get(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('report_status', location='args')
@@ -392,6 +393,7 @@ class AdminReport(Resource):
         
         return report_list, 200, {'Content-Type': 'application/json'}
 
+    @jwt_required
     def put(self):
         parser = parser = reqparse.RequestParser()
         parser.add_argument('report_id', location='json', required=True)
@@ -411,7 +413,7 @@ class AdminReport(Resource):
 class GetBalance(Resource):
     @jwt_required
     def get(self):
-        balance=get_balance()      
+        balance = get_balance()      
         return {'balance': balance}, 200
     
     def options(self):
